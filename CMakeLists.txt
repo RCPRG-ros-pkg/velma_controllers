@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(velma_controller)
+
+### ROS Dependencies ###
+# Find the RTT-ROS package (this transitively includes the Orocos CMake macros)
+find_package(catkin REQUIRED COMPONENTS
+  rtt_ros
+  rtt_roscomm
+  geometry_msgs 
+  std_msgs 
+  message_generation
+  controller_common
+  )
+
+find_package(Eigen REQUIRED)
+find_package(orocos_kdl REQUIRED)
+
+link_directories(${orocos_kdl_LIBRARY_DIRS})
+
+include_directories(${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
+
+### Orocos Dependencies ###
+# Note that orocos_use_package() does not need to be called for any dependency
+# listed in the package.xml file
+
+include_directories(${USE_OROCOS_INCLUDE_DIRS} include)
+
+### Orocos Targets ###
+
+orocos_component(velma_controller src/velma_controller.cpp)
+target_link_libraries(velma_controller ${orocos_kdl_LIBRARIES})
+
+orocos_service(velma_service src/velma_service.cpp)
+target_link_libraries(velma_service ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
+
+
+# Export package information (replaces catkin_package() macro) 
+orocos_generate_package(
+  DEPENDS rtt_ros geometry_msgs std_msgs message_runtime rtt_roscomm
+)
