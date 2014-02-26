@@ -30,8 +30,12 @@ include_directories(${USE_OROCOS_INCLUDE_DIRS} include)
 orocos_component(velma_controller src/velma_controller.cpp)
 target_link_libraries(velma_controller ${orocos_kdl_LIBRARIES})
 
+orocos_component(velma_sim src/velma_sim.cpp)
+target_link_libraries(velma_sim ${orocos_kdl_LIBRARIES})
+
 orocos_service(velma_service src/velma_service.cpp)
 target_link_libraries(velma_service ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
+
 
 
 # Export package information (replaces catkin_package() macro) 
