@@ -22,6 +22,7 @@
   <!-- ROS Msg Typekits and Srv Proxies -->
   <build_depend>rtt_sensor_msgs</build_depend>
   <run_depend>rtt_sensor_msgs</run_depend>
+  <run_depend>common_controllers</run_depend>
 
   <export>
     <rtt_ros>

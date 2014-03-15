@@ -11,9 +11,9 @@
 
 #include "params.inc"
 
-class VelmaService : public controller_common::RobotService<16, 2> {
+class VelmaService : public controller_common::RobotService {
 public:
-	VelmaService(RTT::TaskContext* owner) : controller_common::RobotService<16, 2>(owner) {
+	VelmaService(RTT::TaskContext* owner) : controller_common::RobotService(owner) {
 
 	}
 
@@ -22,15 +22,25 @@ public:
 	}
 
 	virtual void jacobian(Jacobian &x, const Joints &q, const Tool tool[2]){
+		x.setZero();
 #include "jacobian.inc"
 	}
 
 	virtual void inertia(Inertia &x, const Joints &q, const ToolMass toolM[2]){
+		x.setZero();
 #include "inertia.inc"
 	}
 
 	virtual void fkin(Eigen::Affine3d *x, const Joints &q, const Tool tool[2]){
 #include "fkin.inc"
+	}
+
+	virtual int getNumberOfDofs() {
+		return 16;
+	}
+
+	virtual int getNumberOfEffectors() {
+		return 2;
 	}
 };
 
