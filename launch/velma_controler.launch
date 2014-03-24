@@ -6,23 +6,23 @@
   <include file="$(find rtt_ros)/launch/deployer.launch">
     <arg name="NAME" value="velma_controler"/>
     <arg name="DEPLOYER_ARGS" value="-s $(find velma_controller)/config/velma.ops"/>
-    <arg name="LOG_LEVEL" value="error"/>
+    <arg name="LOG_LEVEL" value="$(arg LOG_LEVEL)"/>
     <arg name="DEBUG" value="$(arg DEBUG)"/>
   </include>
 
   <group ns="velma_controler">
     <rosparam>
       FRIl:
-        fri_port: 49948
-      FRIr:
         fri_port: 49938
+      FRIr:
+        fri_port: 49948
       Ts:
         outputs: [2, 7, 7]
       JntLimit:
-        upper_limit: [100, 100, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]
-        lower_limit: [-100, -100, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96]
-        limit_range: [0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26,0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26]
-        max_trq: [10, 10, 100, 100, 80, 50, 50, 30, 30, 100, 100, 80, 50, 50, 30, 30]
+        upper_limit: [100.0, 100.0, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]
+        lower_limit: [-100.0, -100.0, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96]
+        limit_range: [0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26]
+        max_trq: [10.0, 10.0, 100.0, 100.0, 80.0, 50.0, 50.0, 30.0, 30.0, 100.0, 100.0, 80.0, 50.0, 50.0, 30.0, 30.0]
       JntPub:
         joint_names: [torso_0_joint, torso_1_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint]
     </rosparam>
