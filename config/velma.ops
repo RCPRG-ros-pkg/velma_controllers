@@ -1,0 +1,167 @@
+import("rtt_ros");
+import("rtt_roscomm");
+import("rtt_rosparam");
+
+ros.import("conman");
+ros.import("lwr_fri");
+ros.import("velma_hardware");
+ros.import("oro_joint_state_publisher");
+ros.import("lwr_inertia");
+ros.import("controller_common");
+ros.import("velma_controller");
+
+//------------------------------------------------------------------------------
+//-- Hardware interface
+//------------------------------------------------------------------------------
+
+loadComponent("FRIr", "FRIComponent");
+setActivity("FRIr", 0.0, 6, ORO_SCHED_RT);
+FRIr.loadService("rosparam");
+FRIr.rosparam.getAll();
+
+loadComponent("FRIl", "FRIComponent")
+setActivity("FRIl", 0.0, 6, ORO_SCHED_RT)
+FRIl.loadService("rosparam");
+FRIl.rosparam.getAll();
+
+loadComponent("VT", "VelmaTorso")
+setActivity("VT", 0.001, 6, ORO_SCHED_RT)
+VT.loadService("rosparam");
+VT.rosparam.getAll();
+
+FRIr.configure();
+FRIl.configure();
+VT.configure();
+
+//------------------------------------------------------------------------------
+//-- Controller manager
+//------------------------------------------------------------------------------
+loadComponent("scheme", "conman::Scheme");
+setActivity("scheme", 0.001, 5, ORO_SCHED_RT);
+scheme.configure();
+
+//------------------------------------------------------------------------------
+//-- Velma controller
+//------------------------------------------------------------------------------
+
+loadComponent("Jc", "VectorConcate3");
+
+connect("VT.JointPosition", "Jc.In0", ConnPolicy());
+connect("FRIr.JointPosition", "Jc.In1", ConnPolicy());
+connect("FRIl.JointPosition", "Jc.In2", ConnPolicy());
+
+loadComponent("Jvc", "VectorConcate3");
+
+connect("VT.JointVelocity", "Jvc.In0", ConnPolicy());
+connect("FRIr.JointVelocity", "Jvc.In1", ConnPolicy());
+connect("FRIl.JointVelocity", "Jvc.In2", ConnPolicy());
+
+loadComponent("Ts", "VectorSplit3");
+Ts.loadService("rosparams");
+Ts.rosparam.getAll();
+
+connect("Ts.Out0", "VT.JointTorqueCommand", ConnPolicy());
+connect("Ts.Out1", "FRIr.JointTorqueCommand", ConnPolicy());
+connect("Ts.Out2", "FRIl.JointTorqueCommand", ConnPolicy());
+
+loadComponent("Mass", "RobotMassMatrix");
+Mass.loadService("robot");
+Mass.configure();
+
+connect("Jc.Out", "Mass.JointPosition", ConnPolicy());
+
+d:loadComponent("CImp", "CartesianImpedance");
+CImp.loadService("robot");
+CImp.configure();
+
+connect("Jc.Out", "CImp.JointPosition", ConnPolicy());
+connect("Jvc.Out", "CImp.JointVelocity", ConnPolicy());
+connect("Mass.MassMatrix", "CImp.MassMatrixInv", ConnPolicy());
+
+connect("CImp.JointTorqueCommand", "Ts.In", ConnPolicy());
+
+loadComponent("PoseInt", "CartesianInterpolator");
+
+connect("CImp.CartesianPosition0", "PoseInt.CartesianPosition", ConnPolicy());
+connect("PoseInt.CartesianPositionCommand", "CImp.CartesianPositionCommand0", ConnPolicy());
+
+loadComponent("JntLimit", "JointLimitAvoidance");
+JntLimit.loadService("rosparam");
+JntLimit.rosparam.getAll();
+
+connect("Jc.Out", "JntLimit.JointPosition", ConnPolicy())
+connect("Jvc.Out", "JntLimit.JointVelocity", ConnPolicy())
+connect("Mass.MassMatrix", "JntLimit.MassMatrix", ConnPolicy())
+connect("JntLimit.JointTorqueCommand", "CImp.NullSpaceTorqueCommand", ConnPolicy())
+
+Jc.configure()
+Jvc.configure()
+Ts.configure()
+PoseInt.configure()
+JntLimit.configure()
+
+addPeer("scheme", "Jc")
+addPeer("scheme", "Jvc")
+addPeer("scheme", "Mass")
+addPeer("scheme", "CImp")
+addPeer("scheme", "Ts")
+addPeer("scheme", "JntLimit")
+addPeer("scheme", "PoseInt")
+
+scheme.addBlock("Jc")
+scheme.addBlock("Jvc")
+scheme.addBlock("Mass")
+scheme.addBlock("CImp")
+scheme.addBlock("Ts")
+scheme.addBlock("JntLimit")
+scheme.addBlock("PoseInt")
+scheme.latchConnections("CImp", "PoseInt", true)
+
+//------------------------------------------------------------------------------
+//-- ROS Diagnostics
+//------------------------------------------------------------------------------
+
+loadComponent("JntPub", "JointStatePublisher");
+setActivity("JntPub", 0.01, 2, ORO_SCHED_RT);
+JntPub.loadService("rosparam");
+
+connect("Jc.Out", "JntPub.JointPosition", ConnPolicy());
+connect("Jvc.Out", "JntPub.JointVelocity", ConnPolicy());
+connect("CImp.JointTorqueCommand", "JntPub.JointEffort", ConnPolicy());
+
+JntPub.configure()
+
+//------------------------------------------------------------------------------
+//-- ROS Command interface
+//------------------------------------------------------------------------------
+loadComponent("CartTrjA", "CartesianTrajectoryAction");
+setActivity("CartTrjA", 0.01, 1, ORO_SCHED_RT);
+
+connect("CartTrjA.CartesianTrajectoryCommand", "PoseInt.CartesianTrajectoryCommand", ConnPolicy());
+
+stream("CartTrjA.trajectory", ros.comm.topic("/trajectory"));
+
+CartTrjA.configure();
+
+//------------------------------------------------------------------------------
+stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
+
+VT.start();
+FRIr.start();
+FRIl.start();
+
+scheme.start();
+Jc.start();
+Jvc.start();
+Ts.start();
+Mass.start();
+//CImp.start()
+JntPub.start();
+CartTrjA.start();
+
+function start()
+   CImp.start()
+   JntLimit.start()
+   PoseInt.start()
+end
+
