@@ -31,7 +31,7 @@
 import rospy
 import tf
 
-from controller_common.msg import *
+from cartesian_trajectory_msgs.msg import *
 from geometry_msgs.msg import *
 
 from tf.transformations import * 

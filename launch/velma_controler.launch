@@ -1,5 +1,5 @@
+<?xml version="1.0"?>
 <launch>
-
   <arg name="LOG_LEVEL" default="error"/>
   <arg name="DEBUG" default="false"/>
 
@@ -16,6 +16,10 @@
         fri_port: 49938
       FRIr:
         fri_port: 49948
+      LWRlDiag:
+        prefix: left_arm_
+      LWRrDiag:
+        prefix: right_arm_
       Ts:
         outputs: [2, 7, 7]
       JntLimit:

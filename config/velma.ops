@@ -3,6 +3,7 @@ import("rtt_roscomm");
 import("rtt_rosparam");
 
 ros.import("conman");
+ros.import("conman_ros");
 ros.import("lwr_fri");
 ros.import("velma_hardware");
 ros.import("oro_joint_state_publisher");
@@ -33,11 +34,35 @@ FRIr.configure();
 FRIl.configure();
 VT.configure();
 
+stream("FRIr.KRL_CMD", ros.comm.topic("/right_arm/KRL_CMD"));
+stream("FRIl.KRL_CMD", ros.comm.topic("/left_arm/KRL_CMD"));
+
+loadComponent("LWRrDiag", "FRIDiagnostics")
+setActivity("LWRrDiag", 0.1, 1, ORO_SCHED_RT)
+LWRrDiag.loadService("rosparam");
+LWRrDiag.rosparam.getAll();
+
+connect("FRIr.RobotState", "LWRrDiag.RobotState", ConnPolicy());
+connect("FRIr.FRIState", "LWRrDiag.FRIState", ConnPolicy());
+stream("LWRrDiag.Diagnostics", ros.comm.topic("/diagnostic"));
+LWRrDiag.configure()
+
+loadComponent("LWRlDiag", "FRIDiagnostics")
+setActivity("LWRlDiag", 0.1, 1, ORO_SCHED_RT)
+LWRlDiag.loadService("rosparam");
+LWRlDiag.rosparam.getAll();
+
+connect("FRIl.RobotState", "LWRlDiag.RobotState", ConnPolicy());
+connect("FRIl.FRIState", "LWRlDiag.FRIState", ConnPolicy());
+stream("LWRlDiag.Diagnostics", ros.comm.topic("/diagnostic"));
+LWRlDiag.configure()
+
 //------------------------------------------------------------------------------
 //-- Controller manager
 //------------------------------------------------------------------------------
 loadComponent("scheme", "conman::Scheme");
 setActivity("scheme", 0.001, 5, ORO_SCHED_RT);
+scheme.loadService("conman_ros");
 scheme.configure();
 
 //------------------------------------------------------------------------------
@@ -150,6 +175,9 @@ stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
 VT.start();
 FRIr.start();
 FRIl.start();
+
+LWRrDiag.start();
+LWRrDiag.start();
 
 scheme.start();
 Jc.start();
