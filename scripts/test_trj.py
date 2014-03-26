@@ -38,15 +38,9 @@ from tf.transformations import *
 
 from PyKDL import Rotation
 
-class Gyro:
-    """
-Class for interfacing with gyroscope on Elektron mobile robot.
-Responsible for retrieving data from device, calibration and
-calculating current orientation.
-"""
-
+class Test:
     def __init__(self):
-        rospy.init_node('gyroscope')
+        rospy.init_node('test_trj')
     
         self.frame_id = 'torso_base'
         self.prev_time = rospy.Time.now()
@@ -79,10 +73,10 @@ calculating current orientation.
 
 
 if __name__ == '__main__':
-    gyro = Gyro()
+    test = Test()
 
     try:
-        gyro.spin()
+        test.spin()
     except rospy.ROSInterruptException: pass
     except IOError: pass
     except KeyError: pass
