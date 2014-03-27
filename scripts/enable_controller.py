@@ -67,10 +67,9 @@ class Test:
                     self.state = 2;
         elif self.state==2:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
-                if self.conmanSwitch(['PoseInt'], [], True):
+                if self.conmanSwitch(['PoseIntRight', 'PoseIntLeft'], [], True):
                     self.state = 3;
         elif self.state==3:
-            print 'dupa';
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
                 xxx = Int32();
                 xxx.data = 1;
@@ -102,7 +101,8 @@ class Test:
         self.state = 0;
         
     def spin(self):
-        rospy.spin()
+        while(not self.state==4):
+            rospy.sleep(1.0)
 
 if __name__ == '__main__':
     test = Test()

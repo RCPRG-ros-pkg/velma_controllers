@@ -46,31 +46,36 @@ class Test:
         self.prev_time = rospy.Time.now()
 
         # publisher with imu data
-        self.pub = rospy.Publisher("/trajectory", CartesianTrajectory)
+        self.right_pub = rospy.Publisher("/right_arm/trajectory", CartesianTrajectory)
+        self.left_pub = rospy.Publisher("/left_arm/trajectory", CartesianTrajectory)
         self.listener = tf.TransformListener();
         rospy.sleep(1.0)
     def spin(self):
         self.prev_time = rospy.Time.now()
 
-        trj = CartesianTrajectory()
+        trjr = CartesianTrajectory()
         
-        trj.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
+        trjr.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
         
-        trj.points.append(CartesianTrajectoryPoint(
+        trjr.points.append(CartesianTrajectoryPoint(
         rospy.Duration(10.0),
         Pose(Point(0.3, -0.50, 1.18), Quaternion(0.0, 0.0, 0.0, 1.0)),
         Twist()))
         
-        trj.points.append(CartesianTrajectoryPoint(
-        rospy.Duration(20.0),
-        Pose(Point(0.5, 0.16, 1.18), Quaternion(0.0, 0.0, 0.0, 1.0)),
+        trjl = CartesianTrajectory()
+        
+        trjl.header.stamp = trjr.header.stamp
+        
+        trjl.points.append(CartesianTrajectoryPoint(
+        rospy.Duration(10.0),
+        Pose(Point(0.3, 0.50, 1.18), Quaternion(0.0, 0.0, 1.0, 0.0)),
         Twist()))
-             
-        print trj
-        self.pub.publish(trj)
+        
+        self.right_pub.publish(trjr)
+        self.left_pub.publish(trjl)
+        
         while not rospy.is_shutdown():
           rospy.sleep(1.0)
-
 
 if __name__ == '__main__':
     test = Test()

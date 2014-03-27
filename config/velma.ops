@@ -106,10 +106,15 @@ connect("Mass.MassMatrix", "CImp.MassMatrixInv", ConnPolicy());
 
 connect("CImp.JointTorqueCommand", "Ts.In", ConnPolicy());
 
-loadComponent("PoseInt", "CartesianInterpolator");
+loadComponent("PoseIntRight", "CartesianInterpolator");
 
-connect("CImp.CartesianPosition0", "PoseInt.CartesianPosition", ConnPolicy());
-connect("PoseInt.CartesianPositionCommand", "CImp.CartesianPositionCommand0", ConnPolicy());
+connect("CImp.CartesianPosition0", "PoseIntRight.CartesianPosition", ConnPolicy());
+connect("PoseIntRight.CartesianPositionCommand", "CImp.CartesianPositionCommand0", ConnPolicy());
+
+loadComponent("PoseIntLeft", "CartesianInterpolator");
+
+connect("CImp.CartesianPosition1", "PoseIntLeft.CartesianPosition", ConnPolicy());
+connect("PoseIntLeft.CartesianPositionCommand", "CImp.CartesianPositionCommand1", ConnPolicy());
 
 loadComponent("JntLimit", "JointLimitAvoidance");
 JntLimit.loadService("rosparam");
@@ -123,7 +128,8 @@ connect("JntLimit.JointTorqueCommand", "CImp.NullSpaceTorqueCommand", ConnPolicy
 Jc.configure();
 Jvc.configure();
 Ts.configure();
-PoseInt.configure();
+PoseIntRight.configure();
+PoseIntLeft.configure();
 JntLimit.configure();
 
 addPeer("scheme", "Jc");
@@ -132,7 +138,8 @@ addPeer("scheme", "Mass");
 addPeer("scheme", "CImp");
 addPeer("scheme", "Ts");
 addPeer("scheme", "JntLimit");
-addPeer("scheme", "PoseInt");
+addPeer("scheme", "PoseIntRight");
+addPeer("scheme", "PoseIntLeft");
 
 scheme.addBlock("Jc");
 scheme.addBlock("Jvc");
@@ -140,9 +147,10 @@ scheme.addBlock("Mass");
 scheme.addBlock("CImp");
 scheme.addBlock("Ts");
 scheme.addBlock("JntLimit");
-scheme.addBlock("PoseInt");
-scheme.latchConnections("CImp", "PoseInt", true);
-
+scheme.addBlock("PoseIntRight");
+scheme.addBlock("PoseIntLeft");
+scheme.latchConnections("CImp", "PoseIntRight", true);
+scheme.latchConnections("CImp", "PoseIntLeft", true);
 //------------------------------------------------------------------------------
 //-- ROS Diagnostics
 //------------------------------------------------------------------------------
@@ -161,14 +169,23 @@ JntPub.configure()
 //------------------------------------------------------------------------------
 //-- ROS Command interface
 //------------------------------------------------------------------------------
-loadComponent("CartTrjA", "CartesianTrajectoryAction");
-setActivity("CartTrjA", 0.01, 1, ORO_SCHED_RT);
+loadComponent("CartTrjRight", "CartesianTrajectoryAction");
+setActivity("CartTrjRight", 0.01, 1, ORO_SCHED_RT);
 
-connect("CartTrjA.CartesianTrajectoryCommand", "PoseInt.CartesianTrajectoryCommand", ConnPolicy());
+connect("CartTrjRight.CartesianTrajectoryCommand", "PoseIntRight.CartesianTrajectoryCommand", ConnPolicy());
 
-stream("CartTrjA.trajectory", ros.comm.topic("/trajectory"));
+stream("CartTrjRight.trajectory", ros.comm.topic("/right_arm/trajectory"));
 
-CartTrjA.configure();
+CartTrjRight.configure();
+
+loadComponent("CartTrjLeft", "CartesianTrajectoryAction");
+setActivity("CartTrjLeft", 0.01, 1, ORO_SCHED_RT);
+
+connect("CartTrjLeft.CartesianTrajectoryCommand", "PoseIntLeft.CartesianTrajectoryCommand", ConnPolicy());
+
+stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
+
+CartTrjLeft.configure();
 
 //------------------------------------------------------------------------------
 stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
@@ -187,13 +204,14 @@ Ts.start();
 Mass.start();
 //CImp.start()
 JntPub.start();
-CartTrjA.start();
+CartTrjRight.start();
+CartTrjLeft.start();
 
 /*
 export void vstart()
    CImp.start()
    JntLimit.start()
-   PoseInt.start()
+   PoseIntRight.start()
 end
 */
 
