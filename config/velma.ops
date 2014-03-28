@@ -256,3 +256,5 @@ export void vstart()
 end
 */
 
+waitForInterrupt()
+
