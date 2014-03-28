@@ -20,6 +20,10 @@
         prefix: left_arm_
       LWRrDiag:
         prefix: right_arm_
+      Ps:
+        outputs: [2, 2]
+      Vs:
+        outputs: [2, 2]
       Ts:
         outputs: [2, 7, 7]
       JntLimit:

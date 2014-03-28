@@ -47,15 +47,15 @@ class Test:
                 self.left_arm_power = (stat.values[0].value == '1111111')
             elif stat.name=='left_arm_ FRI state':
                 self.left_arm_command = stat.values[1].value == 'command'
-                self.left_fri_state = (stat.values[2].value == 'OK') or (stat.values[2].value == 'PERFECT')
+                self.left_fri_state = ((stat.values[2].value == 'OK') or (stat.values[2].value == 'PERFECT'))
             elif stat.name=='right_arm_ robot state':
                 self.right_arm_power = (stat.values[0].value == '1111111')
             elif stat.name=='right_arm_ FRI state':
                 self.right_arm_command = stat.values[1].value == 'command'
-                self.right_fri_state = (stat.values[2].value == 'OK') or (stat.values[2].value == 'PERFECT')
+                self.right_fri_state = ((stat.values[2].value == 'OK') or (stat.values[2].value == 'PERFECT'))
         
 #        print self.left_arm_power
-#        print self.left_fri_state
+        print self.state
         
         if self.state==0:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):

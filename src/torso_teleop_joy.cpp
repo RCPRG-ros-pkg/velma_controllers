@@ -15,7 +15,7 @@
 #define MAX_VEL_X	50000
 #define MAX_VEL_Y	20000
 #define MAX_VEL_T	200
-#define MAX_TRQ_T	20
+#define MAX_TRQ_T	35
 
 class TorsoTeleopJoy : public RTT::TaskContext {
 public:
@@ -24,6 +24,7 @@ public:
 		this->ports()->addPort("HeadJointPositionCommand", port_HeadJointPositionCommand).doc("");
 		this->ports()->addPort("TorsoJointPositionCommand", port_TorsoJointPositionCommand).doc("");
 		this->ports()->addPort("TorsoJointTorqueCommand", port_TorsoJointTorqueCommand).doc("");
+		this->ports()->addPort("NullSpaceTorqueCommand", port_NullSpaceTorqueCommand).doc("");
 
 		this->ports()->addPort("JointVelocity", port_JointVelocity).doc("");
 		this->ports()->addPort("JointPosition", port_JointPosition).doc("");
@@ -40,10 +41,15 @@ public:
 		head_jnt_pos_cmd_.resize(HEAD_CTRL_MNJ);
 		torso_jnt_pos_cmd_.resize(TORSO_CTRL_MNJ);
 		torso_jnt_trq_cmd_.resize(TORSO_CTRL_MNJ);
+		nullspace_torque_command_.resize(16);
+		for(int i=0; i<16; i++)
+			nullspace_torque_command_(i) = 0;
+		
 
 		port_HeadJointPositionCommand.setDataSample(head_jnt_pos_cmd_);
 		port_TorsoJointPositionCommand.setDataSample(torso_jnt_pos_cmd_);
 		port_TorsoJointTorqueCommand.setDataSample(torso_jnt_trq_cmd_);
+		port_NullSpaceTorqueCommand.setDataSample(nullspace_torque_command_);
 		
 		set1000PosX = 0;
 		set1000PosY = 0;
@@ -83,8 +89,8 @@ public:
 		if(joy_fs == RTT::NewData){
 			setVelX = - joy_.axes[0] * MAX_VEL_X * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			setVelY = - joy_.axes[1] * MAX_VEL_Y * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
-			setVelT = - joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
-			setTrqT = - joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.8);
+			setVelT = - joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
+			setTrqT = - joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
 		}
 		set1000PosX += setVelX;
@@ -100,12 +106,15 @@ public:
 		port_TorsoJointPositionCommand.write(torso_jnt_pos_cmd_);
 		torso_jnt_trq_cmd_(0) = setTrqT;
 		port_TorsoJointTorqueCommand.write(torso_jnt_trq_cmd_);
+		nullspace_torque_command_(0) = setTrqT;
+		port_NullSpaceTorqueCommand.write(nullspace_torque_command_);
 	}
 
 private:
 	RTT::OutputPort<Eigen::VectorXd > port_HeadJointPositionCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointPositionCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointTorqueCommand;
+	RTT::OutputPort<Eigen::VectorXd > port_NullSpaceTorqueCommand;
 
 	RTT::InputPort<Eigen::VectorXd > port_JointVelocity;
 	RTT::InputPort<Eigen::VectorXd > port_JointPosition;
@@ -120,6 +129,7 @@ private:
 	Eigen::VectorXd head_jnt_pos_cmd_;
 	Eigen::VectorXd torso_jnt_pos_cmd_;
 	Eigen::VectorXd torso_jnt_trq_cmd_;
+	Eigen::VectorXd nullspace_torque_command_;
 
 	bool synchro_;
 	int loopCnt;
