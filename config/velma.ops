@@ -67,18 +67,48 @@ scheme.loadService("conman_ros");
 scheme.configure();
 
 //------------------------------------------------------------------------------
+//-- Torso Joystick Teleop
+//------------------------------------------------------------------------------
+
+loadComponent("TJ", "TorsoTeleopJoy")
+setActivity("TJ", 0.001, 6, ORO_SCHED_RT)
+TJ.loadService("rosparam");
+TJ.rosparam.getAll();
+TJ.configure();
+
+loadComponent("TJc", "VectorConcate2");
+setActivity("TJc", 0.001, 6, ORO_SCHED_RT)
+
+connect("TJ.TorsoJointPositionCommand", "TJc.In0", ConnPolicy());
+connect("TJ.HeadJointPositionCommand", "TJc.In1", ConnPolicy());
+connect("TJc.Out", "VT.JointPositionCommand", ConnPolicy());
+TJc.configure();
+
+stream("TJ.Joy", ros.comm.topic("/joy"));
+
+//------------------------------------------------------------------------------
 //-- Velma controller
 //------------------------------------------------------------------------------
 
+loadComponent("Ps", "VectorSplit2");
+Ps.loadService("rosparam");
+Ps.rosparam.getAll();
+connect("VT.JointPosition", "Ps.In", ConnPolicy());
+
 loadComponent("Jc", "VectorConcate3");
 
-connect("VT.JointPosition", "Jc.In0", ConnPolicy());
+connect("Ps.Out0", "Jc.In0", ConnPolicy());
 connect("FRIr.JointPosition", "Jc.In1", ConnPolicy());
 connect("FRIl.JointPosition", "Jc.In2", ConnPolicy());
 
+loadComponent("Vs", "VectorSplit2");
+Vs.loadService("rosparam");
+Vs.rosparam.getAll();
+connect("VT.JointVelocity", "Vs.In", ConnPolicy());
+
 loadComponent("Jvc", "VectorConcate3");
 
-connect("VT.JointVelocity", "Jvc.In0", ConnPolicy());
+connect("Vs.Out0", "Jvc.In0", ConnPolicy());
 connect("FRIr.JointVelocity", "Jvc.In1", ConnPolicy());
 connect("FRIl.JointVelocity", "Jvc.In2", ConnPolicy());
 
@@ -125,13 +155,18 @@ connect("Jvc.Out", "JntLimit.JointVelocity", ConnPolicy());
 connect("Mass.MassMatrix", "JntLimit.MassMatrix", ConnPolicy());
 connect("JntLimit.JointTorqueCommand", "CImp.NullSpaceTorqueCommand", ConnPolicy());
 
+connect("TJ.NullSpaceTorqueCommand", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
+
+Ps.configure();
 Jc.configure();
+Vs.configure();
 Jvc.configure();
 Ts.configure();
 PoseIntRight.configure();
 PoseIntLeft.configure();
 JntLimit.configure();
 
+addPeer("scheme", "Ps");
 addPeer("scheme", "Jc");
 addPeer("scheme", "Jvc");
 addPeer("scheme", "Mass");
@@ -141,6 +176,7 @@ addPeer("scheme", "JntLimit");
 addPeer("scheme", "PoseIntRight");
 addPeer("scheme", "PoseIntLeft");
 
+scheme.addBlock("Ps");
 scheme.addBlock("Jc");
 scheme.addBlock("Jvc");
 scheme.addBlock("Mass");
@@ -190,6 +226,9 @@ CartTrjLeft.configure();
 //------------------------------------------------------------------------------
 stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
 
+TJ.start();
+TJc.start();
+
 VT.start();
 FRIr.start();
 FRIl.start();
@@ -198,6 +237,8 @@ LWRrDiag.start();
 LWRlDiag.start();
 
 scheme.start();
+Ps.start();
+Vs.start();
 Jc.start();
 Jvc.start();
 Ts.start();
@@ -214,4 +255,6 @@ export void vstart()
    PoseIntRight.start()
 end
 */
+
+waitForInterrupt()
 

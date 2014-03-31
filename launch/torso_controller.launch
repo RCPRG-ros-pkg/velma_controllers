@@ -1,0 +1,17 @@
+<launch>
+
+  <arg name="LOG_LEVEL" default="error"/>
+  <arg name="DEBUG" default="false"/>
+
+  <include file="$(find rtt_ros)/launch/deployer.launch">
+    <arg name="NAME" value="torso_controller"/>
+    <arg name="DEPLOYER_ARGS" value="-s $(find velma_controller)/config/torso.ops"/>
+    <arg name="LOG_LEVEL" value="$(arg LOG_LEVEL)"/>
+    <arg name="DEBUG" value="$(arg DEBUG)"/>
+  </include>
+
+  <group ns="torso_controler">
+    <rosparam>
+    </rosparam>
+  </group>
+</launch>

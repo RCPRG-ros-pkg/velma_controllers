@@ -1,0 +1,13 @@
+<launch>
+
+   <arg name="LOG_LEVEL" default="error"/>
+   <arg name="DEBUG" default="false"/>
+
+   <node name="joy_node" pkg="joy" type="joy_node" output="screen" >
+      <rosparam>
+         dev: "/dev/input/js1"
+      </rosparam>
+   </node>
+
+</launch>
+
