@@ -122,11 +122,15 @@ connect("Ts.Out0", "VT.JointTorqueCommand", ConnPolicy());
 connect("Ts.Out1", "FRIr.JointTorqueCommand", ConnPolicy());
 connect("Ts.Out2", "FRIl.JointTorqueCommand", ConnPolicy());
 
-loadComponent("Mass", "RobotMassMatrix");
+
+//loadComponent("Mass", "RobotMassMatrix");
+loadComponent("Mass", "MassTest");
 Mass.loadService("robot");
 Mass.configure();
 
 connect("Jc.Out", "Mass.JointPosition", ConnPolicy());
+connect("FRIl.MassMatrix", "Mass.MassMatrixLeft", ConnPolicy());
+connect("FRIr.MassMatrix", "Mass.MassMatrixRight", ConnPolicy());
 
 loadComponent("CImp", "CartesianImpedance");
 CImp.loadService("robot");
@@ -202,6 +206,8 @@ connect("Jc.Out", "JntPub.JointPosition", ConnPolicy());
 connect("Jvc.Out", "JntPub.JointVelocity", ConnPolicy());
 connect("CImp.JointTorqueCommand", "JntPub.JointEffort", ConnPolicy());
 
+stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
+
 JntPub.configure()
 
 //------------------------------------------------------------------------------
@@ -226,7 +232,7 @@ stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 CartTrjLeft.configure();
 
 //------------------------------------------------------------------------------
-stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
+
 
 VT.start();
 FRIr.start();
