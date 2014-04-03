@@ -76,6 +76,8 @@ TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
 
+connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
+
 loadComponent("TJc", "VectorConcate2");
 setActivity("TJc", 0.001, 6, ORO_SCHED_RT)
 
@@ -226,15 +228,15 @@ CartTrjLeft.configure();
 //------------------------------------------------------------------------------
 stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
 
-TJ.start();
-TJc.start();
-
 VT.start();
 FRIr.start();
 FRIl.start();
 
 LWRrDiag.start();
 LWRlDiag.start();
+
+TJc.start();
+TJ.start();
 
 scheme.start();
 Ps.start();

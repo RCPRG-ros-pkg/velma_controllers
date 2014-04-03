@@ -12,14 +12,24 @@
 #define TORSO_CTRL_MNJ 1
 #define TEST_LOOP_T 5000
 
-#define MAX_VEL_X	50000
-#define MAX_VEL_Y	20000
-#define MAX_VEL_T	200
+#define GEAR0 158.0
+#define GEAR1 1.0
+#define GEAR2 50.0
+#define GEAR3 50.0
+
+#define ENC0 5000.0
+#define ENC1 5000.0
+#define ENC2 500.0
+#define ENC3 500.0
+
+#define MAX_VEL_X	(50000/(ENC2 * 4.0 * GEAR2) * M_PI * 2)
+#define MAX_VEL_Y	(20000/(ENC3 * 4.0 * GEAR3) * M_PI * 2)
+#define MAX_VEL_T	(200/(ENC1 * 4.0 * GEAR1) * M_PI * 2)
 #define MAX_TRQ_T	35
 
 class TorsoTeleopJoy : public RTT::TaskContext {
 public:
-	TorsoTeleopJoy(const std::string & name) : TaskContext(name) {
+	TorsoTeleopJoy(const std::string & name) : TaskContext(name, PreOperational) {
 
 		this->ports()->addPort("HeadJointPositionCommand", port_HeadJointPositionCommand).doc("");
 		this->ports()->addPort("TorsoJointPositionCommand", port_TorsoJointPositionCommand).doc("");
@@ -50,22 +60,27 @@ public:
 		port_TorsoJointPositionCommand.setDataSample(torso_jnt_pos_cmd_);
 		port_TorsoJointTorqueCommand.setDataSample(torso_jnt_trq_cmd_);
 		port_NullSpaceTorqueCommand.setDataSample(nullspace_torque_command_);
-		
-		set1000PosX = 0;
-		set1000PosY = 0;
-		setPosX = 0;
-		setPosY = 0;
-		setVelX = 0;
-		setVelY = 0;
-		set1000PosT = 0;
-		setPosT = 0;
-		setVelT = 0;
-		setTrqT = 0;
 
 		return true;
 	}
 
 	bool startHook() {
+		Eigen::VectorXd jnt_pos;
+		if(port_JointPosition.read(jnt_pos) != RTT::NewData)
+			return false;
+		
+		torso_jnt_pos_cmd_(0) = jnt_pos(1);
+		
+		head_jnt_pos_cmd_(0) = jnt_pos(2);
+		head_jnt_pos_cmd_(1) = jnt_pos(3);
+
+		
+		setVelX = 0.0;
+		setVelY = 0.0;
+		setVelT = 0.0;
+		
+		setTrqT = 0.0;
+		
 		return true;
 	}
 
@@ -73,17 +88,7 @@ public:
 	}
 
 	void updateHook() {
-		int32_t pos0, pos1, pos2, pos3;
 		RTT::FlowStatus joy_fs;
-		// Test of 2,3 drives control
-		/*if(++loopCnt > TEST_LOOP_T){
-			loopCnt = 0;
-			testMoveDir = (testMoveDir == 5000) ? (-5000) : 5000;
-			jnt_pos_cmd_(0) = 2*testMoveDir;
-			jnt_pos_cmd_(1) = testMoveDir;
-			port_JointPositionCommand.write(jnt_pos_cmd_);
-			std::cout << "Sent!" << std::endl;
-		}*/
 		
 		joy_fs = port_Joy.read(joy_);
 		if(joy_fs == RTT::NewData){
@@ -93,16 +98,10 @@ public:
 			setTrqT = - joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
 		}
-		set1000PosX += setVelX;
-		set1000PosY += setVelY;
-		set1000PosT += setVelT;
-		setPosX = set1000PosX / 1000;
-		setPosY = set1000PosY / 1000;
-		setPosT = set1000PosT / 1000;
-		head_jnt_pos_cmd_(0) = setPosX;
-		head_jnt_pos_cmd_(1) = setPosY;
+		head_jnt_pos_cmd_(0) += setVelX / 1000.0;
+		head_jnt_pos_cmd_(1) += setVelY / 1000.0;
 		port_HeadJointPositionCommand.write(head_jnt_pos_cmd_);
-		torso_jnt_pos_cmd_(0) = setPosT;
+		torso_jnt_pos_cmd_(0) += setVelT / 1000.0;
 		port_TorsoJointPositionCommand.write(torso_jnt_pos_cmd_);
 		torso_jnt_trq_cmd_(0) = setTrqT;
 		port_TorsoJointTorqueCommand.write(torso_jnt_trq_cmd_);
@@ -135,9 +134,7 @@ private:
 	int loopCnt;
 	int testMoveDir;
 	
-	long int set1000PosX, set1000PosY, set1000PosT;
-	int setPosX, setPosY, setPosT;
-	float setVelX, setVelY, setVelT;
+	double setVelX, setVelY, setVelT;
 	int setTrqT;
 };
 
