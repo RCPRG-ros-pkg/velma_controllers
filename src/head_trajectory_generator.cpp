@@ -51,7 +51,9 @@ public:
 			testMoveDir = (testMoveDir == 5000) ? (-5000) : 5000;
 			jnt_pos_cmd_(0) = 2*testMoveDir;
 			jnt_pos_cmd_(1) = testMoveDir;
+			fake_jnt_pos_cmd_(0) = 0;
 			port_JointPositionCommand.write(jnt_pos_cmd_);
+			port_FakeJointPositionCommand.write(fake_jnt_pos_cmd_);
 			std::cout << "Position Command Sent!" << std::endl;
 		}
 	}

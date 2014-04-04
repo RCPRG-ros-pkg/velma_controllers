@@ -14,7 +14,7 @@
 
 #define GEAR0 158.0
 #define GEAR1 1.0
-#define GEAR2 50.0
+#define GEAR2 113.0
 #define GEAR3 50.0
 
 #define ENC0 5000.0
@@ -66,8 +66,9 @@ public:
 
 	bool startHook() {
 		Eigen::VectorXd jnt_pos;
-		if(port_JointPosition.read(jnt_pos) != RTT::NewData)
-			return false;
+		// Really hope some VT component is up
+		while(port_JointPosition.read(jnt_pos) != RTT::NewData)
+			;
 		
 		torso_jnt_pos_cmd_(0) = jnt_pos(1);
 		
@@ -92,10 +93,10 @@ public:
 		
 		joy_fs = port_Joy.read(joy_);
 		if(joy_fs == RTT::NewData){
-			setVelX = - joy_.axes[0] * MAX_VEL_X * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
+			setVelX =  joy_.axes[0] * MAX_VEL_X * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			setVelY = - joy_.axes[1] * MAX_VEL_Y * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
-			setVelT = - joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
-			setTrqT = - joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
+			setVelT =  joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
+			setTrqT =  joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
 		}
 		head_jnt_pos_cmd_(0) += setVelX / 1000.0;
