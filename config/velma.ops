@@ -161,7 +161,14 @@ connect("Jvc.Out", "JntLimit.JointVelocity", ConnPolicy());
 connect("Mass.MassMatrix", "JntLimit.MassMatrix", ConnPolicy());
 connect("JntLimit.JointTorqueCommand", "CImp.NullSpaceTorqueCommand", ConnPolicy());
 
+loadComponent("VG", "VelmaGrav");
+VG.configure();
+
+connect("FRIl.GravityTorque", "VG.GravTrqLeft", ConnPolicy());
+connect("FRIr.GravityTorque", "VG.GravTrqRight", ConnPolicy());
+
 connect("TJ.NullSpaceTorqueCommand", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
+//connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
 
 Ps.configure();
 Jc.configure();
@@ -181,6 +188,7 @@ addPeer("scheme", "Ts");
 addPeer("scheme", "JntLimit");
 addPeer("scheme", "PoseIntRight");
 addPeer("scheme", "PoseIntLeft");
+addPeer("scheme", "VG");
 
 scheme.addBlock("Ps");
 scheme.addBlock("Jc");
@@ -193,6 +201,7 @@ scheme.addBlock("PoseIntRight");
 scheme.addBlock("PoseIntLeft");
 scheme.latchConnections("CImp", "PoseIntRight", true);
 scheme.latchConnections("CImp", "PoseIntLeft", true);
+scheme.addBlock("VG");
 //------------------------------------------------------------------------------
 //-- ROS Diagnostics
 //------------------------------------------------------------------------------
@@ -255,6 +264,7 @@ Mass.start();
 JntPub.start();
 CartTrjRight.start();
 CartTrjLeft.start();
+VG.start();
 
 /*
 export void vstart()
