@@ -37,6 +37,9 @@ target_link_libraries(torso_teleop_joy ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIE
 orocos_component(head_trajectory src/head_trajectory_generator.cpp)
 target_link_libraries(head_trajectory ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
 
+orocos_component(velma_sim src/velma_grav.cpp)
+target_link_libraries(velma_sim ${catkin_LIBRARIES})
+
 if(${OROCOS_TARGET} STREQUAL "xenomai" )
 # message("Found RTNET: ${RTNET_INCLUDE_DIR}")
 # include_directories(${RTNET_INCLUDE_DIR})

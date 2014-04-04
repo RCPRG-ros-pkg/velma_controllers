@@ -10,8 +10,8 @@
 
   <node
     name="velma_controller"
-    pkg="rtt_ros" type="rttscript"
-    args="--DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/velma.ops --">
+    pkg="rtt_ros" type="deployer"
+    args="--DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/velma.ops --" output="screen">
     <env name="OROCOS_TARGET" value="$(arg OROCOS_TARGET)"/>
     <env name="RTT_COMPONENT_PATH" value="$(arg RTT_COMPONENT_PATH)"/>
   </node>
@@ -36,7 +36,7 @@
         upper_limit: [100.0, 100.0, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]
         lower_limit: [-100.0, -100.0, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96]
         limit_range: [0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26]
-        max_trq: [10.0, 10.0, 100.0, 100.0, 80.0, 50.0, 50.0, 30.0, 30.0, 100.0, 100.0, 80.0, 50.0, 50.0, 30.0, 30.0]
+        max_trq: [10.0, 10.0, 50.0, 50.0, 50.0, 50.0, 50.0, 30.0, 30.0, 50.0, 50.0, 50.0, 50.0, 50.0, 30.0, 30.0]
       JntPub:
         joint_names: [torso_0_joint, torso_1_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint]
     </rosparam>
