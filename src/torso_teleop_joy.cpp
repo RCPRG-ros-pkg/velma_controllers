@@ -5,6 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include <geometry_msgs/Point.h>
 #include "sensor_msgs/Joy.h"
 
 #define FULL_TORSO_MNJ 4
@@ -27,6 +28,18 @@
 #define MAX_VEL_T	(200/(ENC1 * 4.0 * GEAR1) * M_PI * 2)
 #define MAX_TRQ_T	35
 
+#define HTP_MIN_X	0.0
+#define HTP_MAX_X	3.0
+#define HTP_MIN_Y	-2.0
+#define HTP_MAX_Y	2.0
+#define HTP_MIN_Z	0.0
+#define HTP_MAX_Z	2.5
+#define HTP_DEF_X	1.00d
+#define HTP_DEF_Y	0.00d
+#define HTP_DEF_Z	1.54d
+
+#define JOY_CMD_TIMEOUT	5000	// [UpdateHookCycles]
+
 class TorsoTeleopJoy : public RTT::TaskContext {
 public:
 	TorsoTeleopJoy(const std::string & name) : TaskContext(name, PreOperational) {
@@ -35,6 +48,7 @@ public:
 		this->ports()->addPort("TorsoJointPositionCommand", port_TorsoJointPositionCommand).doc("");
 		this->ports()->addPort("TorsoJointTorqueCommand", port_TorsoJointTorqueCommand).doc("");
 		this->ports()->addPort("NullSpaceTorqueCommand", port_NullSpaceTorqueCommand).doc("");
+		this->ports()->addPort("HeadTargetPoint", port_HeadTargetPointCommand).doc("");
 
 		this->ports()->addPort("JointVelocity", port_JointVelocity).doc("");
 		this->ports()->addPort("JointPosition", port_JointPosition).doc("");
@@ -54,12 +68,19 @@ public:
 		nullspace_torque_command_.resize(16);
 		for(int i=0; i<16; i++)
 			nullspace_torque_command_(i) = 0;
-		
 
 		port_HeadJointPositionCommand.setDataSample(head_jnt_pos_cmd_);
 		port_TorsoJointPositionCommand.setDataSample(torso_jnt_pos_cmd_);
 		port_TorsoJointTorqueCommand.setDataSample(torso_jnt_trq_cmd_);
 		port_NullSpaceTorqueCommand.setDataSample(nullspace_torque_command_);
+		port_HeadTargetPointCommand.setDataSample(head_target_point_cmd_);
+		
+		head_target_point_cmd_.x = HTP_DEF_X;
+		head_target_point_cmd_.y = HTP_DEF_Y;
+		head_target_point_cmd_.z = HTP_DEF_Z;
+		
+//		joyCmdWD = JOY_CMD_TIMEOUT;	// Component doesn't send position commands until joy data received.
+		joyCmdWD = 0; // Component sends position commands after start.
 
 		return true;
 	}
@@ -68,19 +89,24 @@ public:
 		Eigen::VectorXd jnt_pos;
 		// Really hope some VT component is up
 		while(port_JointPosition.read(jnt_pos) != RTT::NewData)
-			;
+			usleep(100);
 		
 		torso_jnt_pos_cmd_(0) = jnt_pos(1);
 		
 		head_jnt_pos_cmd_(0) = jnt_pos(2);
 		head_jnt_pos_cmd_(1) = jnt_pos(3);
 
+		//std::cout<< "jnt_pos[]: " << torso_jnt_pos_cmd_(0) << " " << head_jnt_pos_cmd_(0) << " " << head_jnt_pos_cmd_(1) << " " << std::endl;
 		
 		setVelX = 0.0;
 		setVelY = 0.0;
 		setVelT = 0.0;
 		
 		setTrqT = 0.0;
+		
+		targetVelX = 0.0;
+		targetVelY = 0.0;
+		targetVelZ = 0.0;
 		
 		return true;
 	}
@@ -97,17 +123,44 @@ public:
 			setVelY = - joy_.axes[1] * MAX_VEL_Y * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			setVelT =  joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			setTrqT =  joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
+			targetVelX = 0;
+			targetVelY =  joy_.axes[0] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
+			targetVelZ =  -joy_.axes[1] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
+			joyCmdWD = 0;
 		}
-		head_jnt_pos_cmd_(0) += setVelX / 1000.0;
-		head_jnt_pos_cmd_(1) += setVelY / 1000.0;
-		port_HeadJointPositionCommand.write(head_jnt_pos_cmd_);
-		torso_jnt_pos_cmd_(0) += setVelT / 1000.0;
-		port_TorsoJointPositionCommand.write(torso_jnt_pos_cmd_);
-		torso_jnt_trq_cmd_(0) = setTrqT;
-		port_TorsoJointTorqueCommand.write(torso_jnt_trq_cmd_);
-		nullspace_torque_command_(0) = setTrqT;
-		port_NullSpaceTorqueCommand.write(nullspace_torque_command_);
+		if(joyCmdWD < JOY_CMD_TIMEOUT){
+			head_jnt_pos_cmd_(0) += setVelX / 1000.0;
+			head_jnt_pos_cmd_(1) += setVelY / 1000.0;
+			port_HeadJointPositionCommand.write(head_jnt_pos_cmd_);
+			torso_jnt_pos_cmd_(0) += setVelT / 1000.0;
+			port_TorsoJointPositionCommand.write(torso_jnt_pos_cmd_);
+			torso_jnt_trq_cmd_(0) = setTrqT;
+			port_TorsoJointTorqueCommand.write(torso_jnt_trq_cmd_);
+			nullspace_torque_command_(0) = setTrqT;
+			port_NullSpaceTorqueCommand.write(nullspace_torque_command_);
+			
+			head_target_point_cmd_.x += targetVelX;
+			if(head_target_point_cmd_.x < HTP_MIN_X)
+				head_target_point_cmd_.x = HTP_MIN_X;
+			else if(head_target_point_cmd_.x > HTP_MAX_X)
+				head_target_point_cmd_.x = HTP_MAX_X;
+			head_target_point_cmd_.y += targetVelY;
+			if(head_target_point_cmd_.y < HTP_MIN_Y)
+				head_target_point_cmd_.y = HTP_MIN_Y;
+			else if(head_target_point_cmd_.y > HTP_MAX_Y)
+				head_target_point_cmd_.y = HTP_MAX_Y;
+			head_target_point_cmd_.z += targetVelZ;
+			if(head_target_point_cmd_.z < HTP_MIN_Z)
+				head_target_point_cmd_.z = HTP_MIN_Z;
+			else if(head_target_point_cmd_.z > HTP_MAX_Z)
+				head_target_point_cmd_.z = HTP_MAX_Z;
+				
+			port_HeadTargetPointCommand.write(head_target_point_cmd_);
+			std::cout << "X Y Z " << head_target_point_cmd_.x << " " << head_target_point_cmd_.y << " " << head_target_point_cmd_.z << std::endl;
+
+			joyCmdWD ++;
+		}
 	}
 
 private:
@@ -115,6 +168,7 @@ private:
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointPositionCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointTorqueCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_NullSpaceTorqueCommand;
+	RTT::OutputPort<geometry_msgs::Point > port_HeadTargetPointCommand;
 
 	RTT::InputPort<Eigen::VectorXd > port_JointVelocity;
 	RTT::InputPort<Eigen::VectorXd > port_JointPosition;
@@ -130,12 +184,14 @@ private:
 	Eigen::VectorXd torso_jnt_pos_cmd_;
 	Eigen::VectorXd torso_jnt_trq_cmd_;
 	Eigen::VectorXd nullspace_torque_command_;
+	geometry_msgs::Point head_target_point_cmd_;
 
 	bool synchro_;
-	int loopCnt;
+	int joyCmdWD;
 	int testMoveDir;
 	
 	double setVelX, setVelY, setVelT;
+	double targetVelX, targetVelY, targetVelZ;
 	int setTrqT;
 };
 
