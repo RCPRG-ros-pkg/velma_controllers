@@ -124,8 +124,8 @@ public:
 			setVelT =  joy_.axes[4] * MAX_VEL_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			setTrqT =  joy_.axes[3] * MAX_TRQ_T * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.6);
 			targetVelX = 0;
-			targetVelY =  joy_.axes[0] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
-			targetVelZ =  -joy_.axes[1] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
+			targetVelY =  -joy_.axes[0] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
+			targetVelZ =  joy_.axes[1] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
 			joyCmdWD = 0;
 		}

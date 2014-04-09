@@ -76,17 +76,28 @@ TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
 
+loadComponent("HL", "HeadLookAt3D")
+setActivity("HL", 0.001, 6, ORO_SCHED_RT)
+HL.loadService("rosparam");
+HL.rosparam.getAll();
+HL.configure();
+
 connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
+connect("VT.JointPosition", "HL.JointPosition", ConnPolicy());
+connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
 
 loadComponent("TJc", "VectorConcate2");
 setActivity("TJc", 0.001, 6, ORO_SCHED_RT)
 
 connect("TJ.TorsoJointPositionCommand", "TJc.In0", ConnPolicy());
-connect("TJ.HeadJointPositionCommand", "TJc.In1", ConnPolicy());
+//connect("TJ.HeadJointPositionCommand", "TJc.In1", ConnPolicy());
+connect("HL.HeadJointPositionCommand", "TJc.In1", ConnPolicy());
 connect("TJc.Out", "VT.JointPositionCommand", ConnPolicy());
 TJc.configure();
 
 stream("TJ.Joy", ros.comm.topic("/joy"));
+stream("HL.TargetPoint", ros.comm.topic("/look_at"))
+stream("TJ.HeadTargetPoint", ros.comm.topic("/look_at"))
 
 //------------------------------------------------------------------------------
 //-- Velma controller
@@ -252,6 +263,7 @@ LWRlDiag.start();
 
 TJc.start();
 TJ.start();
+HL.start();
 
 scheme.start();
 Ps.start();
