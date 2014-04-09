@@ -157,7 +157,7 @@ public:
 				head_target_point_cmd_.z = HTP_MAX_Z;
 				
 			port_HeadTargetPointCommand.write(head_target_point_cmd_);
-			std::cout << "X Y Z " << head_target_point_cmd_.x << " " << head_target_point_cmd_.y << " " << head_target_point_cmd_.z << std::endl;
+//			std::cout << "X Y Z " << head_target_point_cmd_.x << " " << head_target_point_cmd_.y << " " << head_target_point_cmd_.z << std::endl;
 
 			joyCmdWD ++;
 		}
