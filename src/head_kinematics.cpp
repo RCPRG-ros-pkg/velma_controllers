@@ -49,7 +49,7 @@ HeadKinematics::~HeadKinematics() {
 }
 
 int HeadKinematics::UpdateTorsoPose(double joint1, double joint2){
-	torso_joint[0] = - joint1;
+	torso_joint[0] = joint1;
 	torso_joint[1] = joint2 + M_PI/2;
 }
 
@@ -94,7 +94,7 @@ int HeadKinematics::CalculateHeadPose(double &joint_pan, double &joint_tilt){
 		return -1;
 		if(vb) cout << "Theta1: NaN" << endl;
 	}
-	theta1 = atan2(-yh, xh);
+	theta1 = atan2(yh, xh);
 	x1 = xh/cos(theta1);
 	z1 = zh;
 	if(vb) cout << "Theta1: " << 180*theta1/M_PI << endl;
