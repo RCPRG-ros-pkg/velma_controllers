@@ -5,7 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Pose.h>
 
 #include "head_kinematics.h"
 
@@ -39,9 +39,9 @@ public:
 		
 		h = new HeadKinematics(H_ROT, H_LEAN, H_HEAD, H_CAM);
 		
-		current_point.x = DEFAULT_TARGET_X;
-		current_point.y = DEFAULT_TARGET_Y;
-		current_point.z = DEFAULT_TARGET_Z;
+		current_point.position.x = DEFAULT_TARGET_X;
+		current_point.position.y = DEFAULT_TARGET_Y;
+		current_point.position.z = DEFAULT_TARGET_Z;
 
 		return true;
 	}
@@ -58,15 +58,15 @@ public:
 		double joint_pan, joint_tilt;
 		RTT::FlowStatus target_point_fs, jnt_pos_fs;
 		
-		target_point_fs = port_TargetPoint.read(target_point_);
+		target_point_fs = port_TargetPoint.read(target_point);
 		if(target_point_fs == RTT::NewData){
-			current_point = target_point_;
+			current_point.position = target_point.position;
 		}
 		
 		jnt_pos_fs = port_JointPosition.read(jnt_pos_);
 		if(jnt_pos_fs == RTT::NewData){
 			h->UpdateTorsoPose(jnt_pos_(0), jnt_pos_(1));
-			h->UpdateTargetPosition(current_point.x, current_point.y, current_point.z);
+			h->UpdateTargetPosition(current_point.position.x, current_point.position.y, current_point.position.z);
 			h->TransformTargetToHeadFrame();
 			if(h->CalculateHeadPose(joint_pan, joint_tilt) == 0){
 				head_jnt_pos_cmd_(0) = joint_pan;
@@ -80,11 +80,11 @@ private:
 	HeadKinematics *h;
 
 	RTT::OutputPort<Eigen::VectorXd > port_HeadJointPositionCommand;
-	RTT::InputPort<geometry_msgs::Point > port_TargetPoint;
+	RTT::InputPort<geometry_msgs::Pose > port_TargetPoint;
 	RTT::InputPort<Eigen::VectorXd > port_JointPosition;
 	
-	geometry_msgs::Point target_point_;
-	geometry_msgs::Point current_point;
+	geometry_msgs::Pose target_point;
+	geometry_msgs::Pose current_point;
 	Eigen::VectorXd head_jnt_pos_cmd_;
 	Eigen::VectorXd jnt_pos_;
 
