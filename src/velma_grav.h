@@ -23,11 +23,12 @@ private:
 	RTT::OutputPort<Eigen::VectorXd> port_grav_trq_;
 	RTT::InputPort<Eigen::VectorXd > port_grav_trq_left_;
 	RTT::InputPort<Eigen::VectorXd > port_grav_trq_right_;
+	RTT::InputPort<Eigen::VectorXd > port_joint_velocity_;
 
 	int number_of_joints_;
 	int number_of_effectors_;
 
-	Eigen::VectorXd grav_trq_, grav_trq_left_, grav_trq_right_;
+	Eigen::VectorXd grav_trq_, grav_trq_left_, grav_trq_right_, joint_velocity_;
 };
 
 #endif /* VELMA_GRAV_H_ */

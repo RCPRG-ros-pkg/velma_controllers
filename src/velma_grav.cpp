@@ -14,6 +14,7 @@ VelmaGrav::VelmaGrav(const std::string& name) : RTT::TaskContext(name, PreOperat
 	this->ports()->addPort("GravTrq", port_grav_trq_);
 	this->ports()->addPort("GravTrqLeft", port_grav_trq_left_);
 	this->ports()->addPort("GravTrqRight", port_grav_trq_right_);
+	this->ports()->addPort("JointVelocity", port_joint_velocity_);
 
 }
 
@@ -25,7 +26,8 @@ bool VelmaGrav::configureHook() {
 	grav_trq_.resize(16);
 	grav_trq_left_.resize(7);
 	grav_trq_right_.resize(7);
-
+	joint_velocity_.resize(16);
+	
 	grav_trq_(0) = 0.0;
 	grav_trq_(1) = 0.0;
 
@@ -36,9 +38,12 @@ void VelmaGrav::updateHook() {
 
 	port_grav_trq_left_.read(grav_trq_left_);
 	port_grav_trq_right_.read(grav_trq_right_);
+	port_joint_velocity_.read(joint_velocity_);
 	
 	grav_trq_.segment<7>(2) = -0.5 * grav_trq_right_;
 	grav_trq_.segment<7>(9) = -0.5 * grav_trq_left_;
+	
+	grav_trq_.noalias() -= joint_velocity_;
 	
 	port_grav_trq_.write(grav_trq_);
 }

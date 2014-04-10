@@ -152,6 +152,12 @@ loadComponent("PoseIntLeft", "CartesianInterpolator");
 connect("CImp.CartesianPosition1", "PoseIntLeft.CartesianPosition", ConnPolicy());
 connect("PoseIntLeft.CartesianPositionCommand", "CImp.CartesianPositionCommand1", ConnPolicy());
 
+loadComponent("ImpedanceIntRight", "CartesianImpedanceInterpolator");
+connect("ImpedanceIntRight.CartesianImpedanceCommand", "CImp.CartesianImpedanceCommand0", ConnPolicy());
+
+loadComponent("ImpedanceIntLeft", "CartesianImpedanceInterpolator");
+connect("ImpedanceIntLeft.CartesianImpedanceCommand", "CImp.CartesianImpedanceCommand1", ConnPolicy());
+
 loadComponent("JntLimit", "JointLimitAvoidance");
 JntLimit.loadService("rosparam");
 JntLimit.rosparam.getAll();
@@ -168,7 +174,7 @@ connect("FRIl.GravityTorque", "VG.GravTrqLeft", ConnPolicy());
 connect("FRIr.GravityTorque", "VG.GravTrqRight", ConnPolicy());
 
 connect("TJ.NullSpaceTorqueCommand", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
-//connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
+connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
 
 Ps.configure();
 Jc.configure();
@@ -177,6 +183,8 @@ Jvc.configure();
 Ts.configure();
 PoseIntRight.configure();
 PoseIntLeft.configure();
+ImpedanceIntRight.configure()
+ImpedanceIntLeft.configure()
 JntLimit.configure();
 
 addPeer("scheme", "Ps");
@@ -188,6 +196,8 @@ addPeer("scheme", "Ts");
 addPeer("scheme", "JntLimit");
 addPeer("scheme", "PoseIntRight");
 addPeer("scheme", "PoseIntLeft");
+addPeer("scheme", "ImpedanceIntRight");
+addPeer("scheme", "ImpedanceIntLeft");
 addPeer("scheme", "VG");
 
 scheme.addBlock("Ps");
@@ -199,6 +209,8 @@ scheme.addBlock("Ts");
 scheme.addBlock("JntLimit");
 scheme.addBlock("PoseIntRight");
 scheme.addBlock("PoseIntLeft");
+scheme.addBlock("ImpedanceIntRight");
+scheme.addBlock("ImpedanceIntLeft");
 scheme.latchConnections("CImp", "PoseIntRight", true);
 scheme.latchConnections("CImp", "PoseIntLeft", true);
 scheme.addBlock("VG");
@@ -240,6 +252,26 @@ stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 
 CartTrjLeft.configure();
 
+// impedance
+
+loadComponent("CartImpRight", "CartesianImpedanceAction");
+setActivity("CartImpRight", 0.01, 1, ORO_SCHED_RT);
+
+connect("CartImpRight.CartesianImpedanceTrajectoryCommand", "ImpedanceIntRight.CartesianImpedanceTrajectoryCommand", ConnPolicy());
+
+stream("CartImpRight.impedance", ros.comm.topic("/right_arm/impedance"));
+
+CartImpRight.configure();
+
+loadComponent("CartImpLeft", "CartesianImpedanceAction");
+setActivity("CartImpLeft", 0.01, 1, ORO_SCHED_RT);
+
+connect("CartImpLeft.CartesianImpedanceTrajectoryCommand", "ImpedanceIntLeft.CartesianImpedanceTrajectoryCommand", ConnPolicy());
+
+stream("CartImpLeft.impedance", ros.comm.topic("/left_arm/impedance"));
+
+CartImpLeft.configure();
+
 //------------------------------------------------------------------------------
 
 
@@ -251,7 +283,7 @@ LWRrDiag.start();
 LWRlDiag.start();
 
 TJc.start();
-TJ.start();
+//TJ.start();
 
 scheme.start();
 Ps.start();
@@ -264,15 +296,11 @@ Mass.start();
 JntPub.start();
 CartTrjRight.start();
 CartTrjLeft.start();
-VG.start();
-
-/*
-export void vstart()
-   CImp.start()
-   JntLimit.start()
-   PoseIntRight.start()
-end
-*/
+ImpedanceIntRight.start();
+ImpedanceIntLeft.start();
+CartImpRight.start();
+CartImpLeft.start();
+//VG.start();
 
 waitForInterrupt()
 
