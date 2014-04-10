@@ -5,7 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Pose.h>
 #include "sensor_msgs/Joy.h"
 
 #define FULL_TORSO_MNJ 4
@@ -75,9 +75,9 @@ public:
 		port_NullSpaceTorqueCommand.setDataSample(nullspace_torque_command_);
 		port_HeadTargetPointCommand.setDataSample(head_target_point_cmd_);
 		
-		head_target_point_cmd_.x = HTP_DEF_X;
-		head_target_point_cmd_.y = HTP_DEF_Y;
-		head_target_point_cmd_.z = HTP_DEF_Z;
+		head_target_point_cmd_.position.x = HTP_DEF_X;
+		head_target_point_cmd_.position.y = HTP_DEF_Y;
+		head_target_point_cmd_.position.z = HTP_DEF_Z;
 		
 //		joyCmdWD = JOY_CMD_TIMEOUT;	// Component doesn't send position commands until joy data received.
 		joyCmdWD = 0; // Component sends position commands after start.
@@ -140,24 +140,24 @@ public:
 			nullspace_torque_command_(0) = setTrqT;
 			port_NullSpaceTorqueCommand.write(nullspace_torque_command_);
 			
-			head_target_point_cmd_.x += targetVelX;
-			if(head_target_point_cmd_.x < HTP_MIN_X)
-				head_target_point_cmd_.x = HTP_MIN_X;
-			else if(head_target_point_cmd_.x > HTP_MAX_X)
-				head_target_point_cmd_.x = HTP_MAX_X;
-			head_target_point_cmd_.y += targetVelY;
-			if(head_target_point_cmd_.y < HTP_MIN_Y)
-				head_target_point_cmd_.y = HTP_MIN_Y;
-			else if(head_target_point_cmd_.y > HTP_MAX_Y)
-				head_target_point_cmd_.y = HTP_MAX_Y;
-			head_target_point_cmd_.z += targetVelZ;
-			if(head_target_point_cmd_.z < HTP_MIN_Z)
-				head_target_point_cmd_.z = HTP_MIN_Z;
-			else if(head_target_point_cmd_.z > HTP_MAX_Z)
-				head_target_point_cmd_.z = HTP_MAX_Z;
+			head_target_point_cmd_.position.x += targetVelX;
+			if(head_target_point_cmd_.position.x < HTP_MIN_X)
+				head_target_point_cmd_.position.x = HTP_MIN_X;
+			else if(head_target_point_cmd_.position.x > HTP_MAX_X)
+				head_target_point_cmd_.position.x = HTP_MAX_X;
+			head_target_point_cmd_.position.y += targetVelY;
+			if(head_target_point_cmd_.position.y < HTP_MIN_Y)
+				head_target_point_cmd_.position.y = HTP_MIN_Y;
+			else if(head_target_point_cmd_.position.y > HTP_MAX_Y)
+				head_target_point_cmd_.position.y = HTP_MAX_Y;
+			head_target_point_cmd_.position.z += targetVelZ;
+			if(head_target_point_cmd_.position.z < HTP_MIN_Z)
+				head_target_point_cmd_.position.z = HTP_MIN_Z;
+			else if(head_target_point_cmd_.position.z > HTP_MAX_Z)
+				head_target_point_cmd_.position.z = HTP_MAX_Z;
 				
 			port_HeadTargetPointCommand.write(head_target_point_cmd_);
-//			std::cout << "X Y Z " << head_target_point_cmd_.x << " " << head_target_point_cmd_.y << " " << head_target_point_cmd_.z << std::endl;
+//			std::cout << "X Y Z " << head_target_point_cmd_.position.x << " " << head_target_point_cmd_.position.y << " " << head_target_point_cmd_.position.z << std::endl;
 
 			joyCmdWD ++;
 		}
@@ -168,7 +168,7 @@ private:
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointPositionCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointTorqueCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_NullSpaceTorqueCommand;
-	RTT::OutputPort<geometry_msgs::Point > port_HeadTargetPointCommand;
+	RTT::OutputPort<geometry_msgs::Pose > port_HeadTargetPointCommand;
 
 	RTT::InputPort<Eigen::VectorXd > port_JointVelocity;
 	RTT::InputPort<Eigen::VectorXd > port_JointPosition;
@@ -184,7 +184,7 @@ private:
 	Eigen::VectorXd torso_jnt_pos_cmd_;
 	Eigen::VectorXd torso_jnt_trq_cmd_;
 	Eigen::VectorXd nullspace_torque_command_;
-	geometry_msgs::Point head_target_point_cmd_;
+	geometry_msgs::Pose head_target_point_cmd_;
 
 	bool synchro_;
 	int joyCmdWD;
