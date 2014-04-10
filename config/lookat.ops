@@ -36,19 +36,29 @@ TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
 
+loadComponent("HL", "HeadLookAt3D")
+setActivity("HL", 0.001, 6, ORO_SCHED_RT)
+HL.loadService("rosparam");
+HL.rosparam.getAll();
+HL.configure();
+
 
 loadComponent("Jc", "VectorConcate2");
 setActivity("Jc", 0.001, 6, ORO_SCHED_RT)
 connect("TJ.TorsoJointPositionCommand", "Jc.In0", ConnPolicy());
-connect("TJ.HeadJointPositionCommand", "Jc.In1", ConnPolicy());
-connect("HT.FakeJointPositionCommand", "Jc.In0", ConnPolicy());
-connect("HT.JointPositionCommand", "Jc.In1", ConnPolicy());
+//connect("TJ.HeadJointPositionCommand", "Jc.In1", ConnPolicy());
+connect("HL.HeadJointPositionCommand", "Jc.In1", ConnPolicy());
+//connect("HT.FakeJointPositionCommand", "Jc.In0", ConnPolicy());
+//connect("HT.JointPositionCommand", "Jc.In1", ConnPolicy());
 connect("Jc.Out", "VT.JointPositionCommand", ConnPolicy());
 Jc.configure();
 Jc.start();
 
 connect("TJ.TorsoJointTorqueCommand", "VT.JointTorqueCommand", ConnPolicy());
 connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
+connect("VT.JointPosition", "HL.JointPosition", ConnPolicy());
+
+connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
 
 loadComponent("JntPub", "JointStatePublisher");
 setActivity("JntPub", 0.01, 2, ORO_SCHED_RT);
@@ -76,6 +86,8 @@ stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
 //connect("CartTrjA.CartesianTrajectoryCommand", "PoseInt.CartesianTrajectoryCommand", ConnPolicy());
 
 stream("TJ.Joy", ros.comm.topic("/joy"));
+stream("HL.TargetPoint", ros.comm.topic("/look_at"))
+stream("TJ.HeadTargetPoint", ros.comm.topic("/look_at"))
 
 //CartTrjA.configure();
 
@@ -85,6 +97,7 @@ stream("TJ.Joy", ros.comm.topic("/joy"));
 VT.start();
 //HT.start();
 TJ.start();
+HL.start();
 
 JntPub.start()
 

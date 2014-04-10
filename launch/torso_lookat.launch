@@ -8,22 +8,22 @@
   <!-- Path to look for dynamically-loaded plugins and components (something like /lib/orocos) -->
   <arg name="RTT_COMPONENT_PATH" default="$(env RTT_COMPONENT_PATH)"/>
 
-<!--
+
   <include file="$(find rtt_ros)/launch/deployer.launch">
     <arg name="NAME" value="torso_controller"/>
-    <arg name="DEPLOYER_ARGS" value="-s $(find velma_controller)/config/torso.ops"/>
+    <arg name="DEPLOYER_ARGS" value="-s $(find velma_controller)/config/lookat.ops"/>
     <arg name="LOG_LEVEL" value="$(arg LOG_LEVEL)"/>
     <arg name="DEBUG" value="$(arg DEBUG)"/>
   </include>
-  -->
+<!--
   <node
     name="torso_controller"
     pkg="rtt_ros" type="rttscript"
-    args="--DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/torso.ops --">
+    args="-DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/lookat.ops -">
     <env name="OROCOS_TARGET" value="$(arg OROCOS_TARGET)"/>
     <env name="RTT_COMPONENT_PATH" value="$(arg RTT_COMPONENT_PATH)"/>
   </node>
-  
+  -->
 
   <group ns="torso_controller">
     <rosparam>

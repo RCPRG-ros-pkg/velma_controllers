@@ -37,6 +37,9 @@ target_link_libraries(torso_teleop_joy ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIE
 orocos_component(head_trajectory src/head_trajectory_generator.cpp)
 target_link_libraries(head_trajectory ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
 
+orocos_component(head_lookat3d src/head_lookat3d.cpp src/head_kinematics.cpp)
+target_link_libraries(head_trajectory ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
+
 orocos_component(velma_sim src/velma_grav.cpp)
 target_link_libraries(velma_sim ${catkin_LIBRARIES})
 
@@ -57,6 +60,10 @@ if(${OROCOS_TARGET} STREQUAL "xenomai" )
   orocos_add_compile_flags(head_trajectory ${XENO_CFLAGS})
   orocos_add_link_flags(head_trajectory ${XENO_LDFLAGS})
   TARGET_LINK_LIBRARIES(head_trajectory "-lrtdm")
+  
+  orocos_add_compile_flags(head_lookat3d ${XENO_CFLAGS})
+  orocos_add_link_flags(head_lookat3d ${XENO_LDFLAGS})
+  TARGET_LINK_LIBRARIES(head_lookat3d "-lrtdm")
 endif()
 
 
