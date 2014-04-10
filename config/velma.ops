@@ -84,7 +84,7 @@ HL.configure();
 
 connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
 connect("VT.JointPosition", "HL.JointPosition", ConnPolicy());
-connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
+//connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
 
 loadComponent("TJc", "VectorConcate2");
 setActivity("TJc", 0.001, 6, ORO_SCHED_RT)
@@ -156,6 +156,7 @@ connect("CImp.JointTorqueCommand", "Ts.In", ConnPolicy());
 loadComponent("PoseIntRight", "CartesianInterpolator");
 
 connect("CImp.CartesianPosition0", "PoseIntRight.CartesianPosition", ConnPolicy());
+connect("CImp.CartesianPosition0", "HL.TargetPoint", ConnPolicy());
 connect("PoseIntRight.CartesianPositionCommand", "CImp.CartesianPositionCommand0", ConnPolicy());
 
 loadComponent("PoseIntLeft", "CartesianInterpolator");
