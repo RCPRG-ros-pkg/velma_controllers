@@ -36,8 +36,12 @@ def processFeedback(feedback):
         dy = p.position.y-real_tool[0][1]
         dz = p.position.z-real_tool[0][2]
         length = math.sqrt(dx*dx + dy*dy + dz*dz)
-        qw = quaternion_multiply(real_tool[1], [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w])[3]
-	angle = 2 * math.acos(qw)
+        qw = quaternion_multiply(real_tool[1], quaternion_inverse([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]))[3]
+        if qw>0.99999:
+            qw=0.99999
+        if qw<-0.99999:
+            qw=-0.99999
+        angle = abs(2.0 * math.acos(qw))
 
         duration = length*20
         if angle*2>duration:
@@ -53,7 +57,8 @@ def processFeedback(feedback):
         Twist()))
 
         arm_pub.publish(trj)
-        print duration
+        print "duration: %s"%(duration)
+        print "pose: %s"%(p)
 
 def loop():
     # start the ROS main loop
@@ -65,7 +70,7 @@ def loop():
 
     rospy.sleep(1)
     rate = rospy.Rate(10.0)
-    while 1:
+    while not rospy.is_shutdown():
         rate.sleep()
         real_gripper = listener.lookupTransform('torso_base', prefix+'_HandPalmLink', rospy.Time(0))
 
