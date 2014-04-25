@@ -42,6 +42,12 @@ HL.loadService("rosparam");
 HL.rosparam.getAll();
 HL.configure();
 
+loadComponent("PT", "PoseTransform")
+setActivity("PT", 0.001, 6, ORO_SCHED_RT)
+PT.loadService("rosparam");
+PT.rosparam.getAll();
+PT.configure();
+
 
 loadComponent("Jc", "VectorConcate2");
 setActivity("Jc", 0.001, 6, ORO_SCHED_RT)
@@ -58,7 +64,9 @@ connect("TJ.TorsoJointTorqueCommand", "VT.JointTorqueCommand", ConnPolicy());
 connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
 connect("VT.JointPosition", "HL.JointPosition", ConnPolicy());
 
-connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
+//connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
+connect("TJ.HeadTargetPoint", "PT.PrimaryTargetPoint", ConnPolicy());
+connect("PT.SecondaryTargetPoint", "HL.TargetPoint", ConnPolicy());
 
 loadComponent("JntPub", "JointStatePublisher");
 setActivity("JntPub", 0.01, 2, ORO_SCHED_RT);
@@ -98,6 +106,7 @@ VT.start();
 //HT.start();
 TJ.start();
 HL.start();
+//PT.start();
 
 JntPub.start()
 
@@ -109,5 +118,5 @@ export void vstart()
 end
 */
 
-waitForInterrupt()
+//waitForInterrupt()
 

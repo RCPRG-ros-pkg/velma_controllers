@@ -82,6 +82,17 @@ HL.loadService("rosparam");
 HL.rosparam.getAll();
 HL.configure();
 
+loadComponent("PT", "PoseTransform")
+setActivity("PT", 0.001, 6, ORO_SCHED_RT)
+PT.loadService("rosparam");
+PT.rosparam.getAll();
+PT.configure();
+
+
+connect("TJ.PrimaryFrameSelector", "PT.PrimaryFrameSelector", ConnPolicy());
+connect("TJ.HeadTargetPoint", "PT.PrimaryTargetPoint", ConnPolicy());
+connect("PT.SecondaryTargetPoint", "HL.TargetPoint", ConnPolicy());
+
 connect("VT.JointPosition", "TJ.JointPosition", ConnPolicy());
 connect("VT.JointPosition", "HL.JointPosition", ConnPolicy());
 //connect("TJ.HeadTargetPoint", "HL.TargetPoint", ConnPolicy());
@@ -96,8 +107,8 @@ connect("TJc.Out", "VT.JointPositionCommand", ConnPolicy());
 TJc.configure();
 
 stream("TJ.Joy", ros.comm.topic("/joy"));
-stream("HL.TargetPoint", ros.comm.topic("/look_at"))
-stream("TJ.HeadTargetPoint", ros.comm.topic("/look_at"))
+//stream("HL.TargetPoint", ros.comm.topic("/look_at"))
+//stream("TJ.HeadTargetPoint", ros.comm.topic("/look_at"))
 
 //------------------------------------------------------------------------------
 //-- Velma controller
@@ -156,12 +167,15 @@ connect("CImp.JointTorqueCommand", "Ts.In", ConnPolicy());
 loadComponent("PoseIntRight", "CartesianInterpolator");
 
 connect("CImp.CartesianPosition0", "PoseIntRight.CartesianPosition", ConnPolicy());
-connect("CImp.CartesianPosition0", "HL.TargetPoint", ConnPolicy());
+//connect("CImp.CartesianPosition0", "HL.TargetPoint", ConnPolicy());
+connect("CImp.CartesianPosition0", "PT.PrimaryFrame1", ConnPolicy());
 connect("PoseIntRight.CartesianPositionCommand", "CImp.CartesianPositionCommand0", ConnPolicy());
 
 loadComponent("PoseIntLeft", "CartesianInterpolator");
 
 connect("CImp.CartesianPosition1", "PoseIntLeft.CartesianPosition", ConnPolicy());
+//connect("CImp.CartesianPosition0", "HL.TargetPoint", ConnPolicy());
+connect("CImp.CartesianPosition1", "PT.PrimaryFrame2", ConnPolicy());
 connect("PoseIntLeft.CartesianPositionCommand", "CImp.CartesianPositionCommand1", ConnPolicy());
 
 loadComponent("ImpedanceIntRight", "CartesianImpedanceInterpolator");
@@ -297,6 +311,7 @@ LWRlDiag.start();
 TJc.start();
 TJ.start();
 HL.start();
+PT.start();
 
 scheme.start();
 Ps.start();

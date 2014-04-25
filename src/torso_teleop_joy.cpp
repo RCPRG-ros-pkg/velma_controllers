@@ -1,3 +1,11 @@
+// Copyright 2014 WUT
+/*
+ * torso_teleop_joy.cpp
+ *
+ *  Created on: 28 mar 2014
+ *      Author: mwalecki
+ */
+
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
 #include <rtt/Component.hpp>
@@ -49,6 +57,7 @@ public:
 		this->ports()->addPort("TorsoJointTorqueCommand", port_TorsoJointTorqueCommand).doc("");
 		this->ports()->addPort("NullSpaceTorqueCommand", port_NullSpaceTorqueCommand).doc("");
 		this->ports()->addPort("HeadTargetPoint", port_HeadTargetPointCommand).doc("");
+		this->ports()->addPort("PrimaryFrameSelector", port_primary_frame_selector_).doc("");
 
 		this->ports()->addPort("JointVelocity", port_JointVelocity).doc("");
 		this->ports()->addPort("JointPosition", port_JointPosition).doc("");
@@ -78,6 +87,11 @@ public:
 		head_target_point_cmd_.position.x = HTP_DEF_X;
 		head_target_point_cmd_.position.y = HTP_DEF_Y;
 		head_target_point_cmd_.position.z = HTP_DEF_Z;
+		head_target_point_cmd_.orientation.x = 0;
+		head_target_point_cmd_.orientation.y = 0;
+		head_target_point_cmd_.orientation.z = 0;
+		head_target_point_cmd_.orientation.w = 1;
+		primary_frame_selector_ = 0;
 		
 //		joyCmdWD = JOY_CMD_TIMEOUT;	// Component doesn't send position commands until joy data received.
 		joyCmdWD = 0; // Component sends position commands after start.
@@ -127,6 +141,31 @@ public:
 			targetVelY =  joy_.axes[0] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			targetVelZ =  joy_.axes[1] * 0.001 * ((joy_.buttons[6] || joy_.buttons[4]) ? 1.0 : 0.1);
 			//std::cout<<"setVelX "<<setVelX<<" setVelY "<<setVelY<< std::endl;
+			
+			// [1] [2] [3] [4] Buttons - Primary frame selection
+			if(joy_.buttons[0]){
+				primary_frame_selector_ = 0;
+				head_target_point_cmd_.position.x = HTP_DEF_X;
+				head_target_point_cmd_.position.y = HTP_DEF_Y;
+				head_target_point_cmd_.position.z = HTP_DEF_Z;
+			} else if(joy_.buttons[1]){
+				primary_frame_selector_ = 1;
+				head_target_point_cmd_.position.x = 0;
+				head_target_point_cmd_.position.y = 0;
+				head_target_point_cmd_.position.z = 0;
+			} else if(joy_.buttons[2]){
+				primary_frame_selector_ = 2;
+				head_target_point_cmd_.position.x = 0;
+				head_target_point_cmd_.position.y = 0;
+				head_target_point_cmd_.position.z = 0;
+			} else if(joy_.buttons[3]){
+				primary_frame_selector_ = 3;
+				head_target_point_cmd_.position.x = 0;
+				head_target_point_cmd_.position.y = 0;
+				head_target_point_cmd_.position.z = 0;
+			}
+			
+			
 			joyCmdWD = 0;
 		}
 		if(joyCmdWD < JOY_CMD_TIMEOUT){
@@ -159,6 +198,8 @@ public:
 			port_HeadTargetPointCommand.write(head_target_point_cmd_);
 //			std::cout << "X Y Z " << head_target_point_cmd_.position.x << " " << head_target_point_cmd_.position.y << " " << head_target_point_cmd_.position.z << std::endl;
 
+			port_primary_frame_selector_.write(primary_frame_selector_);
+
 			joyCmdWD ++;
 		}
 	}
@@ -169,6 +210,7 @@ private:
 	RTT::OutputPort<Eigen::VectorXd > port_TorsoJointTorqueCommand;
 	RTT::OutputPort<Eigen::VectorXd > port_NullSpaceTorqueCommand;
 	RTT::OutputPort<geometry_msgs::Pose > port_HeadTargetPointCommand;
+	RTT::OutputPort<int> port_primary_frame_selector_;
 
 	RTT::InputPort<Eigen::VectorXd > port_JointVelocity;
 	RTT::InputPort<Eigen::VectorXd > port_JointPosition;
@@ -185,6 +227,7 @@ private:
 	Eigen::VectorXd torso_jnt_trq_cmd_;
 	Eigen::VectorXd nullspace_torque_command_;
 	geometry_msgs::Pose head_target_point_cmd_;
+	int primary_frame_selector_;
 
 	bool synchro_;
 	int joyCmdWD;

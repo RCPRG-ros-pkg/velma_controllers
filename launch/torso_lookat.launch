@@ -29,6 +29,8 @@
     <rosparam>
       JntPub:
         joint_names: [torso_0_joint, torso_1_joint, head_pan_joint, head_tilt_joint]
+      PT:
+        input_frames: 0
     </rosparam>
   </group>
 </launch>
