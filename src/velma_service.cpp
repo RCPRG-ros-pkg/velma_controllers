@@ -43,5 +43,5 @@ class VelmaService : public controller_common::RobotService {
   }
 };
 
-
+ORO_SERVICE_NAMED_PLUGIN(VelmaService, "robot");
 
