@@ -15,6 +15,7 @@ from geometry_msgs.msg import *
 from tf.transformations import * 
 import tf_conversions.posemath as pm
 from cartesian_trajectory_msgs.msg import *
+import actionlib
 
 def processFeedback(feedback):
 
@@ -23,7 +24,7 @@ def processFeedback(feedback):
     global hand_arm_transform
     global tool
     global p
-    global arm_pub
+    global action_trajectory_client
 
     if feedback.marker_name == 'arm_position_marker':
          gripper = feedback.pose
@@ -47,16 +48,21 @@ def processFeedback(feedback):
         if angle*2>duration:
             duration = angle*2
 
-        trj = CartesianTrajectory()
+        action_trajectory_goal = CartesianTrajectoryGoal()
         
-        trj.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
+        action_trajectory_goal.trajectory.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
         
-        trj.points.append(CartesianTrajectoryPoint(
+        action_trajectory_goal.trajectory.points.append(CartesianTrajectoryPoint(
         rospy.Duration(duration),
         p,
         Twist()))
 
-        arm_pub.publish(trj)
+        action_trajectory_goal.path_tolerance.position = Vector3(0.13,0.13,0.13)
+        action_trajectory_goal.path_tolerance.rotation = Vector3(3.0/180.0*math.pi,3.0/180.0*math.pi,3.0/180.0*math.pi)
+        action_trajectory_goal.goal_tolerance.position = Vector3(0.005,0.005,0.005)
+        action_trajectory_goal.goal_tolerance.rotation = Vector3(1.0/180.0*math.pi,1.0/180.0*math.pi,1.0/180.0*math.pi)
+        action_trajectory_client.send_goal(action_trajectory_goal)
+
         print "duration: %s"%(duration)
         print "pose: %s"%(p)
 
@@ -98,24 +104,6 @@ def loop():
         marker.color.g = 0.0;
         marker.color.b = 1.0;
         pub.publish(marker)
-
-#        marker2 = Marker()
-#        marker2.header.frame_id = 'torso_base'
-#        marker2.header.stamp = rospy.Time.now()
-#        marker2.ns = 'torso_base'
-#        marker2.id = 0
-#        marker2.type = Marker.CUBE
-#        marker2.action = 0
-#        marker2.pose = p
-#        marker2.scale.x = 0.1;
-#        marker2.scale.y = 0.1;
-#        marker2.scale.z = 0.1;
-#        marker2.color.a = 1.0;
-#        marker2.color.r = 0.0;
-#        marker2.color.g = 0.0;
-#        marker2.color.b = 1.0;
-#        pub.publish(marker2)
-
 
 def createSphereMarkerControl(scale, position, color):
     marker = Marker()
@@ -251,7 +239,9 @@ if __name__ == "__main__":
     server.applyChanges();
 
     pub = rospy.Publisher('/' + prefix + '_hand/target', Marker)
-    arm_pub = rospy.Publisher("/"+prefix+"_arm/trajectory", CartesianTrajectory)
+
+    action_trajectory_client = actionlib.SimpleActionClient("/" + prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
+    action_trajectory_client.wait_for_server()
 
     loop()
 

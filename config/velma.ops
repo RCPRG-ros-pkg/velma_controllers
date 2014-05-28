@@ -178,6 +178,24 @@ connect("CImp.CartesianPosition1", "PoseIntLeft.CartesianPosition", ConnPolicy()
 connect("CImp.CartesianPosition1", "PT.PrimaryFrame2", ConnPolicy());
 connect("PoseIntLeft.CartesianPositionCommand", "CImp.CartesianPositionCommand1", ConnPolicy());
 
+// tool
+
+loadComponent("ToolIntRight", "CartesianInterpolator")
+ToolIntRight.configure();
+ToolIntRight.loadService("rosparam");
+ToolIntRight.rosparam.getAll();
+connect("ToolIntRight.CartesianPositionCommand", "CImp.ToolPositionCommand1", ConnPolicy())
+//stream("ToolIntRight.CartesianPositionCommand", ros.comm.topic("/ToolIntRight/CartesianPositionCommand"))
+
+loadComponent("ToolIntLeft", "CartesianInterpolator")
+ToolIntLeft.configure();
+ToolIntLeft.loadService("rosparam");
+ToolIntLeft.rosparam.getAll();
+connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand0", ConnPolicy())
+//stream("ToolIntLeft.CartesianPositionCommand", ros.comm.topic("/ToolIntLeft/CartesianPositionCommand"))
+
+// impedance
+
 loadComponent("ImpedanceIntRight", "CartesianImpedanceInterpolator");
 connect("ImpedanceIntRight.CartesianImpedanceCommand", "CImp.CartesianImpedanceCommand0", ConnPolicy());
 
@@ -225,6 +243,8 @@ addPeer("scheme", "PoseIntLeft");
 addPeer("scheme", "ImpedanceIntRight");
 addPeer("scheme", "ImpedanceIntLeft");
 addPeer("scheme", "VG");
+addPeer("scheme", "ToolIntRight");
+addPeer("scheme", "ToolIntLeft");
 
 scheme.addBlock("Ps");
 scheme.addBlock("Jc");
@@ -240,6 +260,8 @@ scheme.addBlock("ImpedanceIntLeft");
 scheme.latchConnections("CImp", "PoseIntRight", true);
 scheme.latchConnections("CImp", "PoseIntLeft", true);
 scheme.addBlock("VG");
+scheme.addBlock("ToolIntRight");
+scheme.addBlock("ToolIntLeft");
 //------------------------------------------------------------------------------
 //-- ROS Diagnostics
 //------------------------------------------------------------------------------
@@ -264,19 +286,43 @@ loadComponent("CartTrjRight", "CartesianTrajectoryAction");
 setActivity("CartTrjRight", 0.01, 1, ORO_SCHED_RT);
 
 connect("CartTrjRight.CartesianTrajectoryCommand", "PoseIntRight.CartesianTrajectoryCommand", ConnPolicy());
+connect("CartTrjRight.CartesianPosition", "CImp.CartesianPosition0", ConnPolicy());
+connect("CartTrjRight.CartesianPositionCommand", "PoseIntRight.CartesianPositionCommand", ConnPolicy());
 
 stream("CartTrjRight.trajectory", ros.comm.topic("/right_arm/trajectory"));
 
 CartTrjRight.configure();
+CartTrjRight.loadService("actionlib")
+CartTrjRight.actionlib.connect("/right_arm/cartesian_trajectory")
 
 loadComponent("CartTrjLeft", "CartesianTrajectoryAction");
 setActivity("CartTrjLeft", 0.01, 1, ORO_SCHED_RT);
 
 connect("CartTrjLeft.CartesianTrajectoryCommand", "PoseIntLeft.CartesianTrajectoryCommand", ConnPolicy());
+connect("CartTrjLeft.CartesianPosition", "CImp.CartesianPosition1", ConnPolicy());
+connect("CartTrjLeft.CartesianPositionCommand", "PoseIntLeft.CartesianPositionCommand", ConnPolicy());
 
 stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 
 CartTrjLeft.configure();
+CartTrjLeft.loadService("actionlib")
+CartTrjLeft.actionlib.connect("/left_arm/cartesian_trajectory")
+
+// tool
+
+loadComponent("CartToolRight", "CartesianTrajectoryAction");
+setActivity("CartToolRight", 0.01, 1, ORO_SCHED_RT);
+CartToolRight.configure()
+CartToolRight.loadService("actionlib")
+CartToolRight.actionlib.connect("/right_arm/tool_trajectory")
+connect("CartToolRight.CartesianTrajectoryCommand","ToolIntRight.CartesianTrajectoryCommand", ConnPolicy())
+
+loadComponent("CartToolLeft", "CartesianTrajectoryAction");
+setActivity("CartToolLeft", 0.01, 1, ORO_SCHED_RT);
+CartToolLeft.configure()
+CartToolLeft.loadService("actionlib")
+CartToolLeft.actionlib.connect("/left_arm/tool_trajectory")
+connect("CartToolLeft.CartesianTrajectoryCommand","ToolIntLeft.CartesianTrajectoryCommand", ConnPolicy())
 
 // impedance
 
@@ -329,6 +375,10 @@ ImpedanceIntLeft.start();
 CartImpRight.start();
 CartImpLeft.start();
 //VG.start();
+CartToolRight.start()
+CartToolLeft.start()
+ToolIntRight.start()
+ToolIntLeft.start()
 
 waitForInterrupt()
 
