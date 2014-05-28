@@ -288,6 +288,7 @@ setActivity("CartTrjRight", 0.01, 1, ORO_SCHED_RT);
 connect("CartTrjRight.CartesianTrajectoryCommand", "PoseIntRight.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjRight.CartesianPosition", "CImp.CartesianPosition0", ConnPolicy());
 connect("CartTrjRight.CartesianPositionCommand", "PoseIntRight.CartesianPositionCommand", ConnPolicy());
+connect("CartTrjRight.CartesianWrench", "FRIr.CartesianWrench", ConnPolicy());
 
 stream("CartTrjRight.trajectory", ros.comm.topic("/right_arm/trajectory"));
 
@@ -301,6 +302,8 @@ setActivity("CartTrjLeft", 0.01, 1, ORO_SCHED_RT);
 connect("CartTrjLeft.CartesianTrajectoryCommand", "PoseIntLeft.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjLeft.CartesianPosition", "CImp.CartesianPosition1", ConnPolicy());
 connect("CartTrjLeft.CartesianPositionCommand", "PoseIntLeft.CartesianPositionCommand", ConnPolicy());
+connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench", ConnPolicy());
+
 
 stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 
@@ -334,6 +337,8 @@ connect("CartImpRight.CartesianImpedanceTrajectoryCommand", "ImpedanceIntRight.C
 stream("CartImpRight.impedance", ros.comm.topic("/right_arm/impedance"));
 
 CartImpRight.configure();
+CartImpRight.loadService("actionlib")
+CartImpRight.actionlib.connect("/right_arm/cartesian_impedance")
 
 loadComponent("CartImpLeft", "CartesianImpedanceAction");
 setActivity("CartImpLeft", 0.01, 1, ORO_SCHED_RT);
@@ -343,6 +348,8 @@ connect("CartImpLeft.CartesianImpedanceTrajectoryCommand", "ImpedanceIntLeft.Car
 stream("CartImpLeft.impedance", ros.comm.topic("/left_arm/impedance"));
 
 CartImpLeft.configure();
+CartImpLeft.loadService("actionlib")
+CartImpLeft.actionlib.connect("/left_arm/cartesian_impedance")
 
 //------------------------------------------------------------------------------
 
