@@ -11,6 +11,9 @@ ros.import("controller_common");
 ros.import("velma_controller");
 ros.import("rtt_cartesian_trajectory_msgs");
 ros.import("rtt_std_msgs");
+ros.import("ethercat_controller")
+
+setActivity("lwr_controller", 0, 1, ORO_SCHED_RT)
 
 //------------------------------------------------------------------------------
 //-- Hardware interface
@@ -26,6 +29,13 @@ setActivity("FRIl", 0.0, 6, ORO_SCHED_RT)
 FRIl.loadService("rosparam");
 FRIl.rosparam.getAll();
 
+loadComponent("EC", "ECMaster")
+setActivity("EC", 0.001, 6, ORO_SCHED_RT)
+EC.loadService("rosparam")
+EC.rosparam.getAll()
+EC.configure();
+EC.rosparam.getAll()
+
 loadComponent("VT", "VelmaTorso")
 setActivity("VT", 0.001, 6, ORO_SCHED_RT)
 VT.loadService("rosparam");
@@ -34,6 +44,10 @@ VT.rosparam.getAll();
 FRIr.configure();
 FRIl.configure();
 VT.configure();
+
+connect("EC.torso.MotorPosition", "VT.MotorPosition", ConnPolicy());
+connect("EC.torso.MotorVelocity", "VT.MotorVelocity", ConnPolicy());
+connect("EC.torso.MotorCurrentCommand", "VT.MotorCurrentCommand", ConnPolicy());
 
 stream("FRIr.KRL_CMD", ros.comm.topic("/right_arm/KRL_CMD"));
 stream("FRIl.KRL_CMD", ros.comm.topic("/left_arm/KRL_CMD"));
@@ -353,7 +367,7 @@ CartImpLeft.actionlib.connect("/left_arm/cartesian_impedance")
 
 //------------------------------------------------------------------------------
 
-
+EC.start();
 VT.start();
 FRIr.start();
 FRIl.start();
@@ -387,5 +401,9 @@ CartToolLeft.start()
 ToolIntRight.start()
 ToolIntLeft.start()
 
-waitForInterrupt()
+ET.startHoming(1);
+
+//ET.beginOperation();
+
+//waitForInterrupt()
 

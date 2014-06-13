@@ -18,6 +18,11 @@
 
   <group ns="velma_controller">
     <rosparam>
+      EC:
+        names: [torso]
+        torso:
+          ifname: rteth0
+          mode: current
       FRIl:
         fri_port: 49938
       FRIr:
