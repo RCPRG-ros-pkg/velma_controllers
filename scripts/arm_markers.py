@@ -57,10 +57,6 @@ def processFeedback(feedback):
         p,
         Twist()))
 
-        action_trajectory_goal.path_tolerance.position = Vector3(0.13,0.13,0.13)
-        action_trajectory_goal.path_tolerance.rotation = Vector3(3.0/180.0*math.pi,3.0/180.0*math.pi,3.0/180.0*math.pi)
-        action_trajectory_goal.goal_tolerance.position = Vector3(0.005,0.005,0.005)
-        action_trajectory_goal.goal_tolerance.rotation = Vector3(1.0/180.0*math.pi,1.0/180.0*math.pi,1.0/180.0*math.pi)
         action_trajectory_client.send_goal(action_trajectory_goal)
 
         print "duration: %s"%(duration)

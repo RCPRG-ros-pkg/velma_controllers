@@ -70,6 +70,9 @@
             x: 0.0
             y: 0.0
             z: 0.0
+      TfPub:
+        frame_ids: [right_arm_7_link, left_arm_7_link]
+        child_frame_ids: [right_arm_tool, left_arm_tool]
     </rosparam>
   </group>
 </launch>
