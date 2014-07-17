@@ -11,6 +11,7 @@ ros.import("controller_common");
 ros.import("velma_controller");
 ros.import("rtt_cartesian_trajectory_msgs");
 ros.import("rtt_std_msgs");
+ros.import("rtt_tf");
 ros.import("ethercat_controller")
 
 setActivity("lwr_controller", 0, 1, ORO_SCHED_RT)
@@ -169,6 +170,15 @@ connect("Ts.Out0", "VT.JointTorqueCommand", ConnPolicy());
 connect("Ts.Out1", "FRIr.JointTorqueCommand", ConnPolicy());
 connect("Ts.Out2", "FRIl.JointTorqueCommand", ConnPolicy());
 
+loadComponent("Dwr", "DecimatorWrench");
+setActivity("Dwr", 0.01, 1, ORO_SCHED_RT)
+connect("Dwr.In", "FRIr.CartesianWrench", ConnPolicy());
+stream("Dwr.Out", ros.comm.topic("/right_arm/wrench"));
+
+loadComponent("Dwl", "DecimatorWrench");
+setActivity("Dwl", 0.01, 1, ORO_SCHED_RT)
+connect("Dwl.In", "FRIl.CartesianWrench", ConnPolicy());
+stream("Dwl.Out", ros.comm.topic("/left_arm/wrench"));
 
 //loadComponent("Mass", "RobotMassMatrix");
 loadComponent("Mass", "MassTest");
@@ -210,14 +220,21 @@ ToolIntRight.configure();
 ToolIntRight.loadService("rosparam");
 ToolIntRight.rosparam.getAll();
 connect("ToolIntRight.CartesianPositionCommand", "CImp.ToolPositionCommand1", ConnPolicy())
-//stream("ToolIntRight.CartesianPositionCommand", ros.comm.topic("/ToolIntRight/CartesianPositionCommand"))
 
 loadComponent("ToolIntLeft", "CartesianInterpolator")
 ToolIntLeft.configure();
 ToolIntLeft.loadService("rosparam");
 ToolIntLeft.rosparam.getAll();
 connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand0", ConnPolicy())
-//stream("ToolIntLeft.CartesianPositionCommand", ros.comm.topic("/ToolIntLeft/CartesianPositionCommand"))
+
+loadComponent("TfPub", "TfPublisher")
+setActivity("TfPub", 0.01, 1, ORO_SCHED_RT)
+TfPub.loadService("rosparam");
+TfPub.rosparam.getAll();
+TfPub.configure();
+connect("ToolIntRight.CartesianPositionCommand", "TfPub.In0", ConnPolicy())
+connect("ToolIntLeft.CartesianPositionCommand", "TfPub.In1", ConnPolicy())
+stream("TfPub.OutTf", ros.comm.topic("/tf"))
 
 // impedance
 
@@ -250,6 +267,8 @@ Jc.configure();
 Vs.configure();
 Jvc.configure();
 Ts.configure();
+Dwr.configure();
+Dwl.configure();
 PoseIntRight.configure();
 PoseIntLeft.configure();
 ImpedanceIntRight.configure()
@@ -329,7 +348,6 @@ connect("CartTrjLeft.CartesianPosition", "CImp.CartesianPosition1", ConnPolicy()
 connect("CartTrjLeft.CartesianPositionCommand", "PoseIntLeft.CartesianPositionCommand", ConnPolicy());
 connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench", ConnPolicy());
 
-
 stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 
 CartTrjLeft.configure();
@@ -397,6 +415,8 @@ Vs.start();
 Jc.start();
 Jvc.start();
 Ts.start();
+Dwr.start();
+Dwl.start();
 Mass.start();
 //CImp.start()
 JntPub.start();
@@ -412,6 +432,7 @@ CartToolLeft.start()
 ToolIntRight.start()
 ToolIntLeft.start()
 TGR.start()
+TfPub.start()
 
 //waitForInterrupt()
 

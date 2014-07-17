@@ -14,8 +14,82 @@ from visualization_msgs.msg import *
 from geometry_msgs.msg import *
 from tf.transformations import * 
 import tf_conversions.posemath as pm
+import PyKDL
 from cartesian_trajectory_msgs.msg import *
 import actionlib
+
+def getTransformations():
+    global listener
+    global prefix
+    global T_B_W
+    global T_W_T
+    global T_T_W
+
+    pose = listener.lookupTransform('torso_base', prefix+'_arm_7_link', rospy.Time(0))
+    T_B_W = pm.fromTf(pose)
+
+    pose_tool = listener.lookupTransform(prefix+'_arm_7_link', prefix+'_arm_tool', rospy.Time(0))
+    T_W_T = pm.fromTf(pose_tool)
+    T_T_W = T_W_T.Inverse()
+
+def erase6DofMarker():
+    global server
+    server.erase(prefix+'_arm_position_marker')
+    server.applyChanges();
+
+def insert6DofGlobalMarker():
+    global server
+    global T_B_W
+    global T_W_T
+
+    T_B_T = T_B_W * T_W_T
+    int_position_marker = InteractiveMarker()
+    int_position_marker.header.frame_id = 'torso_base'
+    int_position_marker.name = prefix+'_arm_position_marker'
+    int_position_marker.scale = 0.2
+    int_position_marker.pose = pm.toMsg(T_B_T)
+
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'x'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'y'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'z'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'x'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'y'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'z'));
+
+    box = createAxisMarkerControl(Point(0.15,0.015,0.015), Point(0.0, 0.0, 0.0) )
+    box.interaction_mode = InteractiveMarkerControl.BUTTON
+    box.name = 'button'
+    int_position_marker.controls.append( box )
+    server.insert(int_position_marker, processFeedback);
+    server.applyChanges();
+
+def globalState():
+    global marker_state
+    global listener
+    global prefix
+
+    if marker_state == "global" or marker_state=="local":
+       erase6DofMarker()
+
+    marker_state="global"
+    insert6DofGlobalMarker()
+
+def hiddenState():
+    global marker_state
+
+    if marker_state == "global" or marker_state=="local":
+       erase6DofMarker()
+
+    marker_state="hidden"
+
+def processFeedbackHide(feedback):
+    global marker_state
+
+    if ( feedback.event_type == InteractiveMarkerFeedback.BUTTON_CLICK and feedback.control_name == "button_hide" ):
+       if marker_state == "global":
+           hiddenState()
+       else:
+           globalState();
 
 def processFeedback(feedback):
 
@@ -26,27 +100,12 @@ def processFeedback(feedback):
     global p
     global action_trajectory_client
 
-    if feedback.marker_name == 'arm_position_marker':
-         gripper = feedback.pose
+    if feedback.marker_name == prefix+'_arm_position_marker':
+         T_B_Td = pm.fromMsg(feedback.pose)
 
     if ( feedback.event_type == InteractiveMarkerFeedback.BUTTON_CLICK and feedback.control_name == "button" ):
-        real_gripper = listener.lookupTransform('torso_base', prefix+'_HandPalmLink', rospy.Time(0))
-        real_tool = listener.lookupTransform('torso_base', prefix+'_arm_7_link', rospy.Time(0))
-        p = pm.toMsg(pm.fromMsg(gripper) * tool)
-        dx = p.position.x-real_tool[0][0]
-        dy = p.position.y-real_tool[0][1]
-        dz = p.position.z-real_tool[0][2]
-        length = math.sqrt(dx*dx + dy*dy + dz*dz)
-        qw = quaternion_multiply(real_tool[1], quaternion_inverse([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]))[3]
-        if qw>0.99999:
-            qw=0.99999
-        if qw<-0.99999:
-            qw=-0.99999
-        angle = abs(2.0 * math.acos(qw))
-
-        duration = length*20
-        if angle*2>duration:
-            duration = angle*2
+        p = pm.toMsg(T_B_Td)
+        duration = 5.0
 
         action_trajectory_goal = CartesianTrajectoryGoal()
         
@@ -57,10 +116,6 @@ def processFeedback(feedback):
         p,
         Twist()))
 
-        action_trajectory_goal.path_tolerance.position = Vector3(0.13,0.13,0.13)
-        action_trajectory_goal.path_tolerance.rotation = Vector3(3.0/180.0*math.pi,3.0/180.0*math.pi,3.0/180.0*math.pi)
-        action_trajectory_goal.goal_tolerance.position = Vector3(0.005,0.005,0.005)
-        action_trajectory_goal.goal_tolerance.rotation = Vector3(1.0/180.0*math.pi,1.0/180.0*math.pi,1.0/180.0*math.pi)
         action_trajectory_client.send_goal(action_trajectory_goal)
 
         print "duration: %s"%(duration)
@@ -70,40 +125,42 @@ def loop():
     # start the ROS main loop
     global prefix
     global gripper
-    global real_gripper
     global listener
-    global p
+    global T_B_W
+    global T_W_T
 
     rospy.sleep(1)
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
+        getTransformations()
         rate.sleep()
-        real_gripper = listener.lookupTransform('torso_base', prefix+'_HandPalmLink', rospy.Time(0))
 
-        marker = Marker()
-        marker.header.frame_id = 'torso_base'
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = 'torso_base'
-        marker.id = 0
-        marker.type = 0
-        marker.action = 0
-        marker.points.append(gripper.position)
-        marker.points.append(Point(real_gripper[0][0], real_gripper[0][1], real_gripper[0][2]))
-        marker.pose.position.x = 0
-        marker.pose.position.y = 0
-        marker.pose.position.z = 0
-        marker.pose.orientation.x = 0.0;
-        marker.pose.orientation.y = 0.0;
-        marker.pose.orientation.z = 0.0;
-        marker.pose.orientation.w = 1.0;
-        marker.scale.x = 0.001;
-        marker.scale.y = 0.002;
-        marker.scale.z = 0.0;
-        marker.color.a = 1.0;
-        marker.color.r = 0.0;
-        marker.color.g = 0.0;
-        marker.color.b = 1.0;
-        pub.publish(marker)
+        m = Marker()
+        m.header.frame_id = prefix+"_arm_tool"
+        m.header.stamp = rospy.Time.now()
+        m.ns = "tool_pose"
+        m.type = Marker.ARROW
+        m.scale = Point(0.15,0.005,0.005)
+
+        m.id = 0
+        ori = quaternion_about_axis(0, [0, 1 ,0])
+        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
+        m.color = ColorRGBA(0.5,0,0,1)
+        pub.publish(m)
+
+        m.id = 1
+        ori = quaternion_about_axis(math.pi/2.0, [0, 0 ,1])
+        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
+        m.color = ColorRGBA(0,0.5,0,1)
+        pub.publish(m)
+
+        m.id = 2
+        ori = quaternion_about_axis(-math.pi/2.0, [0, 1 ,0])
+        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
+        m.color = ColorRGBA(0,0,0.5,1)
+        pub.publish(m)
+
+
 
 def createSphereMarkerControl(scale, position, color):
     marker = Marker()
@@ -121,10 +178,7 @@ def createBoxMarkerControl(scale, position):
     marker.type = Marker.CUBE
     marker.scale = scale
     marker.pose.position = position
-    marker.color.r = 0.5
-    marker.color.g = 0.5
-    marker.color.b = 0.5
-    marker.color.a = 1.0
+    marker.color = ColorRGBA(0.5,0.5,0.5,1)
     control = InteractiveMarkerControl()
     control.always_visible = True;
     control.markers.append( marker );
@@ -137,35 +191,38 @@ def createAxisMarkerControl(scale, position):
     markerX.pose.position = position
     ori = quaternion_about_axis(0, [0, 1 ,0])
     markerX.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-    markerX.color.r = 1
-    markerX.color.g = 0
-    markerX.color.b = 0
-    markerX.color.a = 1.0
+    markerX.color = ColorRGBA(1,0,0,1)
     markerY = Marker()
     markerY.type = Marker.ARROW
     markerY.scale = scale
     markerY.pose.position = position
     ori = quaternion_about_axis(math.pi/2.0, [0, 0 ,1])
     markerY.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-    markerY.color.r = 0
-    markerY.color.g = 1
-    markerY.color.b = 0
-    markerY.color.a = 1.0
+    markerY.color = ColorRGBA(0,1,0,1)
     markerZ = Marker()
     markerZ.type = Marker.ARROW
     markerZ.scale = scale
     markerZ.pose.position = position
     ori = quaternion_about_axis(-math.pi/2.0, [0, 1 ,0])
     markerZ.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-    markerZ.color.r = 0
-    markerZ.color.g = 0
-    markerZ.color.b = 1
-    markerZ.color.a = 1.0
+    markerZ.color = ColorRGBA(0,0,1,1)
     control = InteractiveMarkerControl()
     control.always_visible = True;
     control.markers.append( markerX );
     control.markers.append( markerY );
     control.markers.append( markerZ );
+    return control
+
+def createButtoMarkerControl(scale, position, color):
+    marker = Marker()
+    marker.type = Marker.SPHERE
+    marker.scale = scale
+    marker.pose.position = position
+    marker.pose.orientation = Quaternion(0,0,0,1)
+    marker.color = color
+    control = InteractiveMarkerControl()
+    control.always_visible = True;
+    control.markers.append( marker );
     return control
 
 def createInteractiveMarkerControl6DOF(mode, axis):
@@ -192,53 +249,59 @@ if __name__ == "__main__":
     for arg in sys.argv:
         a.append(arg)
 
-    if 2 != len(a):
+    if len(a) < 2:
         print "Usage: %s prefix"%a[0]
+        print "you provided:"
+        for x in a:
+            print x
         exit(0)
 
     prefix = a[1]
+    if prefix != "left" and prefix != "right":
+        print "Usage: %s prefix"%a[0]
+        print "prefix should be left or right"
+        print "you provided:"
+        for x in a:
+            print x
+        exit(0)
 
     rospy.init_node(prefix+'_arm_markers', anonymous=True)
+
+    T_B_W = None
+    T_W_T = None
+    T_T_W = None
 
     listener = tf.TransformListener();
 
     # create an interactive marker server on the topic namespace simple_marker
     server = InteractiveMarkerServer(prefix+'_arm_markers')
 
-    rospy.sleep(1)
-    listener.waitForTransform(prefix+'_arm_7_link', prefix+'_HandPalmLink', rospy.Time.now(), rospy.Duration(4.0))
-    listener.waitForTransform('torso_base', prefix+'_arm_7_link', rospy.Time.now(), rospy.Duration(4.0))
+    rospy.sleep(15)
 
-    tool_msg = listener.lookupTransform(prefix+'_HandPalmLink', prefix+'_arm_7_link', rospy.Time(0))
-    tool = pm.fromTf(tool_msg)
-    real_gripper = listener.lookupTransform('torso_base', prefix+'_HandPalmLink', rospy.Time(0))
+    getTransformations()
 
-    int_position_marker = InteractiveMarker()
-    int_position_marker.header.frame_id = 'torso_base'
-    int_position_marker.name = 'arm_position_marker';
-    int_position_marker.scale = 0.2
-    int_position_marker.pose.position = Point(real_gripper[0][0], real_gripper[0][1], real_gripper[0][2])
-    int_position_marker.pose.orientation = Quaternion(real_gripper[1][0], real_gripper[1][1], real_gripper[1][2], real_gripper[1][3])
-    gripper = int_position_marker.pose
-    p = pm.toMsg(pm.fromMsg(gripper) * tool)
+    insert6DofGlobalMarker()
 
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'x'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'y'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'z'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'x'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'y'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'z'));
-
-    box = createAxisMarkerControl(Point(0.15,0.015,0.015), Point(0.0, 0.0, 0.0) )
-    box.interaction_mode = InteractiveMarkerControl.BUTTON
-    box.name = 'button'
-    int_position_marker.controls.append( box )
-
-    server.insert(int_position_marker, processFeedback);
-
+    marker_state="global"
+    int_hide_marker = InteractiveMarker()
+    int_hide_marker.header.frame_id = 'torso_base'
+    int_hide_marker.name = prefix+'_arm_hide_marker';
+    int_hide_marker.scale = 0.2
+    int_hide_marker.pose.orientation = Quaternion(0,0,0,1)
+    if prefix == "right":
+        int_hide_marker.pose.position = Point(0, -0.5, 0)
+        hide = createButtoMarkerControl(Point(0.15,0.15,0.15), Point(0.0, 0.0, 0.0), ColorRGBA(1,0,0,1) )
+    else:
+        int_hide_marker.pose.position = Point(0, 0.5, 0)
+        hide = createButtoMarkerControl(Point(0.15,0.15,0.15), Point(0.0, 0.0, 0.0), ColorRGBA(0,1,0,1) )
+    hide.interaction_mode = InteractiveMarkerControl.BUTTON
+    hide.name = 'button_hide'
+    int_hide_marker.controls.append( hide )
+    server.insert(int_hide_marker, processFeedbackHide);
+    
     server.applyChanges();
 
-    pub = rospy.Publisher('/' + prefix + '_hand/target', Marker)
+    pub = rospy.Publisher('/' + prefix + '_arm/tool_marker', Marker)
 
     action_trajectory_client = actionlib.SimpleActionClient("/" + prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
     action_trajectory_client.wait_for_server()
