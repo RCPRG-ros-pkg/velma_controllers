@@ -51,4 +51,3 @@ void VelmaGrav::updateHook() {
 
 ORO_CREATE_COMPONENT(VelmaGrav)
 
-

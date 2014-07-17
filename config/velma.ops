@@ -125,6 +125,17 @@ stream("TJ.Joy", ros.comm.topic("/joy"));
 //stream("TJ.HeadTargetPoint", ros.comm.topic("/look_at"))
 
 //------------------------------------------------------------------------------
+//-- Camera Trigger
+//------------------------------------------------------------------------------
+
+loadComponent("TGR", "TriggerGenerator");
+setActivity("TGR", 0.05, 2, ORO_SCHED_RT);
+TGR.configure();
+
+connect("TGR.Trigger", "EC.torso.DigitalOutput1", ConnPolicy());
+stream("TGR.TriggerStamp", ros.comm.topic("/camera_trigger_stamp"));
+
+//------------------------------------------------------------------------------
 //-- Velma controller
 //------------------------------------------------------------------------------
 
@@ -400,10 +411,7 @@ CartToolRight.start()
 CartToolLeft.start()
 ToolIntRight.start()
 ToolIntLeft.start()
-
-ET.startHoming(1);
-
-//ET.beginOperation();
+TGR.start()
 
 //waitForInterrupt()
 
