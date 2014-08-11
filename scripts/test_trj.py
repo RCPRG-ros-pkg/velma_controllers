@@ -30,6 +30,7 @@
 
 import rospy
 import tf
+import actionlib
 
 from cartesian_trajectory_msgs.msg import *
 from geometry_msgs.msg import *
@@ -49,6 +50,10 @@ class Test:
         self.right_pub = rospy.Publisher("/right_arm/trajectory", CartesianTrajectory)
         self.left_pub = rospy.Publisher("/left_arm/trajectory", CartesianTrajectory)
         self.listener = tf.TransformListener();
+        
+        self.pose_client = actionlib.SimpleActionClient('/right_arm/cartesian_trajectory', CartesianTrajectoryAction)
+  	self.pose_client.wait_for_server()
+        
         rospy.sleep(1.0)
     def spin(self):
         self.prev_time = rospy.Time.now()
@@ -58,24 +63,24 @@ class Test:
         trjr.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
         
         trjr.points.append(CartesianTrajectoryPoint(
-        rospy.Duration(10.0),
+        rospy.Duration(5.0),
         Pose(Point(0.3, -0.50, 1.18), Quaternion(0.0, 0.0, 0.0, 1.0)),
         Twist()))
         
-        trjl = CartesianTrajectory()
-        
-        trjl.header.stamp = trjr.header.stamp
-        
-        trjl.points.append(CartesianTrajectoryPoint(
+        trjr.points.append(CartesianTrajectoryPoint(
         rospy.Duration(10.0),
-        Pose(Point(0.3, 0.50, 1.18), Quaternion(0.0, 0.0, 1.0, 0.0)),
+        Pose(Point(0.6, -0.50, 1.18), Quaternion(0.0, 0.0, 0.0, 1.0)),
         Twist()))
         
-        self.right_pub.publish(trjr)
-        self.left_pub.publish(trjl)
+        goal = CartesianTrajectoryGoal()
+        goal.trajectory = trjr
+        goal.wrench_constraint = Wrench(Vector3(12.0, 12.0, 12.0), Vector3(0, 0, 0 ))
         
-        while not rospy.is_shutdown():
-          rospy.sleep(1.0)
+        self.pose_client.send_goal(goal)
+        self.pose_client.wait_for_result()
+        command_result = self.pose_client.get_result()
+        
+        print command_result
 
 if __name__ == '__main__':
     test = Test()
