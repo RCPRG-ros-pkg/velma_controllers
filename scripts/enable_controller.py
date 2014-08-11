@@ -63,7 +63,8 @@ class Test:
                     self.state = 1;
         elif self.state==1:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
-                if self.conmanSwitch(['JntLimit'], [], True):
+#                if self.conmanSwitch(['JntLimit'], [], True):
+                if True:
                     self.state = 2;
         elif self.state==2:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):

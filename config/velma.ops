@@ -223,7 +223,27 @@ TfPub.rosparam.getAll();
 TfPub.configure();
 connect("ToolIntRight.CartesianPositionCommand", "TfPub.In0", ConnPolicy())
 connect("ToolIntLeft.CartesianPositionCommand", "TfPub.In1", ConnPolicy())
+connect("PoseIntRight.CartesianPositionCommand", "TfPub.In2", ConnPolicy())
+connect("PoseIntLeft.CartesianPositionCommand", "TfPub.In3", ConnPolicy())
+connect("CImp.CartesianPosition0", "TfPub.In4", ConnPolicy())
+connect("CImp.CartesianPosition1", "TfPub.In5", ConnPolicy())
 stream("TfPub.OutTf", ros.comm.topic("/tf"))
+
+loadComponent("TorquePubRight", "TorquePublisher")
+setActivity("TorquePubRight", 0.01, 1, ORO_SCHED_RT)
+connect("FRIr.JointTorque", "TorquePubRight.InJointTorque", ConnPolicy())
+connect("Ts.Out1", "TorquePubRight.InJointTorqueCommand", ConnPolicy())
+connect("FRIr.GravityTorque", "TorquePubRight.InGravityTorque", ConnPolicy())
+TorquePubRight.configure();
+stream("TorquePubRight.OutTorques", ros.comm.topic("/right_arm/torques"))
+
+loadComponent("TorquePubLeft", "TorquePublisher")
+setActivity("TorquePubLeft", 0.01, 1, ORO_SCHED_RT)
+connect("FRIr.JointTorque", "TorquePubLeft.InJointTorque", ConnPolicy())
+connect("Ts.Out1", "TorquePubLeft.InJointTorqueCommand", ConnPolicy())
+connect("FRIr.GravityTorque", "TorquePubLeft.InGravityTorque", ConnPolicy())
+TorquePubLeft.configure();
+stream("TorquePubLeft.OutTorques", ros.comm.topic("/left_arm/torques"))
 
 // impedance
 
@@ -421,6 +441,8 @@ CartToolLeft.start()
 ToolIntRight.start()
 ToolIntLeft.start()
 TfPub.start()
+TorquePubRight.start()
+TorquePubLeft.start()
 
 //ET.startHoming(1);
 
