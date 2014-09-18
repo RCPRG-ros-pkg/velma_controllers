@@ -340,6 +340,7 @@ connect("Jvc.Out", "JntPub.JointVelocity", ConnPolicy());
 connect("CImp.JointTorqueCommand", "JntPub.JointEffort", ConnPolicy());
 
 stream("JntPub.joint_state", ros.comm.topic("/joint_states"));
+stream("JntPub.joint_state", ros.comm.topic("/joint_states2"));
 
 JntPub.configure()
 
