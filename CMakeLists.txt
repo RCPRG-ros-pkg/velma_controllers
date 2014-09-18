@@ -4,7 +4,7 @@ project(velma_controller)
 ### ROS Dependencies ###
 # Find the RTT-ROS package (this transitively includes the Orocos CMake macros)
 find_package(catkin REQUIRED COMPONENTS
-  rtt_ros rtt_rosclock std_msgs
+  rtt_ros rtt_rosclock std_msgs cmake_modules
   )
 
 find_package(Eigen REQUIRED)
