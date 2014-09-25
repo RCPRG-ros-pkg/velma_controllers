@@ -304,7 +304,7 @@ if __name__ == "__main__":
     
     server.applyChanges();
 
-    pub = rospy.Publisher('/' + prefix + '_arm/tool_marker', Marker)
+    pub = rospy.Publisher('/' + prefix + '_arm/tool_marker', Marker, queue_size=100)
 
     action_trajectory_client = actionlib.SimpleActionClient("/" + prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
     action_trajectory_client.wait_for_server()
