@@ -44,6 +44,9 @@ target_link_libraries(velma_grav ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
 orocos_component(trigger_generator src/trigger_generator.cpp)
 target_link_libraries(trigger_generator ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
 
+orocos_component(velma_fk src/velma_fk.cpp)
+target_link_libraries(velma_fk ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
+
 # Export package information (replaces catkin_package() macro) 
 orocos_generate_package(
   DEPENDS rtt_ros
