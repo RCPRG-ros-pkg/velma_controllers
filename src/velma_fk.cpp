@@ -68,8 +68,8 @@ void VelmaFK::updateHook() {
   
   robot_->fkin(r, joint_position_command_, &tools_[0]);
   
-  tf::poseEigenToMsg(r[0], cmd_left);
-  tf::poseEigenToMsg(r[1], cmd_right);
+  tf::poseEigenToMsg(r[1], cmd_left);
+  tf::poseEigenToMsg(r[0], cmd_right);
   
   port_left_position_command_.write(cmd_left);
   port_right_position_command_.write(cmd_right);
