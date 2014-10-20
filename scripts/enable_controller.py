@@ -2,7 +2,7 @@
 
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2011, Robot Control and Pattern Recognition Group, Warsaw University of Technology
+# Copyright (c) 2011-2014, Robot Control and Pattern Recognition Group, Warsaw University of Technology
 #
 # All rights reserved.
 #
@@ -29,16 +29,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import rospy
-import tf
 
 from controller_manager_msgs.srv import *
 from std_msgs.msg import *
 from diagnostic_msgs.msg import *
-from geometry_msgs.msg import *
-
-from tf.transformations import * 
-
-from PyKDL import Rotation
 
 class Test:
     def diagnostic_callback(self, data):
@@ -54,7 +48,6 @@ class Test:
                 self.right_arm_command = stat.values[1].value == 'command'
                 self.right_fri_state = ((stat.values[2].value == 'OK') or (stat.values[2].value == 'PERFECT'))
         
-#        print self.left_arm_power
         print self.state
         
         if self.state==0:
@@ -83,7 +76,6 @@ class Test:
         rospy.wait_for_service('/controller_manager/switch_controller')
         self.conmanSwitch = rospy.ServiceProxy('/controller_manager/switch_controller', SwitchController)
         
-        # publisher with imu data
         self.leftKRL_CMD = rospy.Publisher("/left_arm/KRL_CMD", Int32, queue_size=1, latch=True)
         self.rightKRL_CMD = rospy.Publisher("/right_arm/KRL_CMD", Int32, queue_size=1, latch=True)
         
