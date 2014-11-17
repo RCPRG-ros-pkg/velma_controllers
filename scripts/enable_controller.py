@@ -52,15 +52,13 @@ class Test:
         
         if self.state==0:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
-                if self.conmanSwitch(['CImp'], [], True):
-                    self.state = 1;
+                self.state = 1;
         elif self.state==1:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
-                if self.conmanSwitch(['JntLimit'], [], True):
-                    self.state = 2;
+                self.state = 2;
         elif self.state==2:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):
-                if self.conmanSwitch(['PoseIntRight', 'PoseIntLeft'], [], True):
+                if self.conmanSwitch(['PoseIntRight', 'PoseIntLeft', 'JntLimit', 'CImp', 'HeadPanVelocityLimiter', 'HeadTiltVelocityLimiter'], [], True):
                     self.state = 3;
         elif self.state==3:
             if (self.left_arm_power and self.right_arm_power and self.left_fri_state and self.right_fri_state):

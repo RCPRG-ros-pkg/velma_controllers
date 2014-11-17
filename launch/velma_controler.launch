@@ -20,9 +20,7 @@
     <rosparam>
       EC:
         names: [torso]
-        torso:
-          ifname: rteth0
-          mode: current
+        ifname: rteth0
       FRIl:
         fri_port: 49938
       FRIr:
@@ -31,10 +29,60 @@
         prefix: left_arm_
       LWRrDiag:
         prefix: right_arm_
-      Ps:
-        outputs: [2, 2]
-      Vs:
-        outputs: [2, 2]
+      TorsoPanTransmision:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: 158.0
+        encoder_res: 20000.0
+      TorsoPanTransmisionInv:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: 158.0
+        encoder_res: 20000.0
+        motor_constant: 0.105
+      TorsoTiltTransmision:
+        motor_offset: 0.0
+        joint_offset: -1.57
+        gear: -1.0
+        encoder_res: 20000.0
+      HeadPanVelocityLimiter:
+        max_vel: 50.0
+      HeadTiltVelocityLimiter:
+        max_vel: 50.0
+      HeadPanTransmision:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: -100.0
+        encoder_res: 8000.0
+      HeadPanTransmisionInv:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: -100.0
+        encoder_res: 8000.0
+        motor_constant: 0.0
+      HeadTiltTransmision:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: 100.0
+        encoder_res: 8000.0
+      HeadTiltTransmisionInv:
+        motor_offset: 0.0
+        joint_offset: 0.0
+        gear: 100.0
+        encoder_res: 8000.0
+        motor_constant: 0.0
+      HeadPosAggregate:
+        number_of_ports: 2
+      HeadVelAggregate:
+        number_of_ports: 2
+      HeadPosSplit:
+        number_of_ports: 2
+      TorsoTrqSplit:
+        number_of_ports: 2
+      TorsoPosAggregate:
+        number_of_ports: 2
+      TorsoVelAggregate:
+        number_of_ports: 2
       Ts:
         outputs: [2, 7, 7]
       TrajectoryGeneratorJoint:
@@ -45,14 +93,14 @@
         upper_limits: [2.0, 2.0, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]
       JntImp:
         number_of_joints: 16
-        initial_stiffness: [100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01]
+        initial_stiffness: [100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 100.01, 0.0, 100.01]
       JntLimit:
         upper_limit: [100.0, 100.0, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]
         lower_limit: [-100.0, -100.0, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96]
         limit_range: [0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26]
         max_trq: [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 6.0, 6.0, 10.0, 10.0, 10.0, 10.0, 10.0, 6.0, 6.0]
       JntPub:
-        joint_names: [torso_0_joint, torso_1_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint]
+        joint_names: [torso_0_joint, torso_1_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint, head_pan_joint, head_tilt_joint]
       PT:
         input_frames: 2
       ToolIntRight:
