@@ -2,6 +2,11 @@
 #ifndef HEAD_KINEMATICS_H_
 #define HEAD_KINEMATICS_H_
 
+#define H_ROT   0.8d  //0.687d
+#define H_LEAN  0.375d  //0.375d
+#define H_HEAD  0.39224d  //0.385d
+#define H_CAM   0.225d  //0.200d
+
 class HeadKinematics {
  public:
   HeadKinematics(double h_rot_, double h_lean_, double h_head_, double h_cam_);

@@ -7,11 +7,6 @@
 #include <cstdlib>
 #include <string>
 
-#define H_ROT   0.705d  //0.687d
-#define H_LEAN  0.375d  //0.375d
-#define H_HEAD  0.385d  //0.385d
-#define H_CAM   0.235d  //0.200d
-
 using namespace std;
 
 main(int argc, char* argv[]) {

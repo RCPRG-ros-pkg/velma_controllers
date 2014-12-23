@@ -19,11 +19,6 @@
 
 #include "Eigen/Dense"
 
-#define H_ROT  0.687d
-#define H_LEAN  0.375d
-#define H_HEAD  0.385d
-#define H_CAM  0.200d
-
 #define HEAD_CTRL_MNJ 2
 #define FULL_TORSO_MNJ 4
 #define DEFAULT_TARGET_X  1.00d

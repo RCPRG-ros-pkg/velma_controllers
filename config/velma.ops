@@ -93,7 +93,7 @@ stream("TJ.Joy", ros.comm.topic("/joy"));
 //------------------------------------------------------------------------------
 
 loadComponent("TGR", "TriggerGenerator");
-setActivityOnCPU("TGR", 0.05, 2, ORO_SCHED_RT, 1);
+setActivityOnCPU("TGR", 0.1, 2, ORO_SCHED_RT, 1);
 TGR.configure();
 
 connect("TGR.Trigger", "EC.torso.subnode0.DigitalOutput1", ConnPolicy());
@@ -506,7 +506,7 @@ scheme.addBlock("PT")
 //------------------------------------------------------------------------------
 
 loadComponent("JntPub", "JointStatePublisher");
-setActivityOnCPU("JntPub", 0.01, 2, ORO_SCHED_RT, 0);
+setActivityOnCPU("JntPub", 0.002, 2, ORO_SCHED_RT, 0);
 JntPub.loadService("rosparam");
 JntPub.rosparam.getAll();
 

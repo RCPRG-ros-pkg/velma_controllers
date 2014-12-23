@@ -4,7 +4,7 @@ project(velma_controller)
 ### ROS Dependencies ###
 # Find the RTT-ROS package (this transitively includes the Orocos CMake macros)
 find_package(catkin REQUIRED COMPONENTS
-  rtt_ros rtt_rosclock std_msgs eigen_conversions cmake_modules
+  rtt_ros rtt_rosclock std_msgs eigen_conversions cmake_modules image_transport
   )
 
 find_package(Eigen REQUIRED)
@@ -50,6 +50,8 @@ target_link_libraries(velocity_limiter ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIE
 orocos_component(velma_fk src/velma_fk.cpp)
 target_link_libraries(velma_fk ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
 
+add_executable(image_stamper_node src/image_stamper.cpp)
+target_link_libraries(image_stamper_node ${catkin_LIBRARIES})
 # Export package information (replaces catkin_package() macro) 
 orocos_generate_package(
   DEPENDS rtt_ros
