@@ -1,6 +1,6 @@
 // Copyright 2014 WUT
 /*
- * velma_sim.cpp
+ * velocity_limiter.cpp
  *
  *  Created on: Feb 26, 2014
  *      Author: Konrad Banachowicz
@@ -15,7 +15,7 @@
 class VelocityLimiter: public RTT::TaskContext {
  public:
   explicit VelocityLimiter(const std::string& name):
-    RTT::TaskContext(name),position_out_(0), max_vel_(0) {
+    RTT::TaskContext(name), position_out_(0), max_vel_(0) {
     this->ports()->addPort("PositionMsr", port_position_msr_);
     this->ports()->addPort("PositionIn", port_position_in_);
     this->ports()->addPort("PositionOut", port_position_out_);
@@ -35,8 +35,8 @@ class VelocityLimiter: public RTT::TaskContext {
 
   void updateHook() {
     double position_cmd;
-    
-    if(port_position_in_.read(position_cmd) == RTT::NewData) {
+
+    if (port_position_in_.read(position_cmd) == RTT::NewData) {
       if (abs(position_out_ - position_cmd) < max_vel_) {
         position_out_ = position_cmd;
       } else if ((position_out_ - position_cmd) < 0.0) {
@@ -49,7 +49,6 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
  private:
-
   RTT::InputPort<double> port_position_msr_;
   RTT::InputPort<double> port_position_in_;
   RTT::OutputPort<double> port_position_out_;

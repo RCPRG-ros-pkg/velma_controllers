@@ -7,8 +7,6 @@
 #include <cstdlib>
 #include <string>
 
-using namespace std;
-
 main(int argc, char* argv[]) {
   double head_joint[2];
 
@@ -16,18 +14,18 @@ main(int argc, char* argv[]) {
     HeadKinematics h(H_ROT, H_LEAN, H_HEAD, H_CAM);
     h.vb = true;
     h.UpdateTargetPositionHeadFrame(strtod(argv[2], NULL), strtod(argv[3], NULL), strtod(argv[4], NULL));
-    h.CalculateHeadPose(head_joint[0], head_joint[1]);
+    h.CalculateHeadPose(&head_joint[0], &head_joint[1]);
   } else if ((argc == 7) && (argv[1] == std::string("--base"))) {
     HeadKinematics h(H_ROT, H_LEAN, H_HEAD, H_CAM);
     h.vb = true;
     h.UpdateTorsoPose(M_PI * strtod(argv[5], NULL) / 180, M_PI * strtod(argv[6], NULL) / 180);
     h.UpdateTargetPosition(strtod(argv[2], NULL), strtod(argv[3], NULL), strtod(argv[4], NULL));
     h.TransformTargetToHeadFrame();
-    h.CalculateHeadPose(head_joint[0], head_joint[1]);
+    h.CalculateHeadPose(&head_joint[0], &head_joint[1]);
   } else {
-    cout << "usage: " << argv[0] << " --head target_x_head target_y_head terget_z_head" << endl;
-    cout << "usage: " << argv[0]
-         << " --base target_x_base target_y_base terget_z_base torso_0_joint torso_1_joint" << endl;
+    std::cout << "usage: " << argv[0] << " --head target_x_head target_y_head terget_z_head" << std::endl;
+    std::cout << "usage: " << argv[0]
+         << " --base target_x_base target_y_base terget_z_base torso_0_joint torso_1_joint" << std::endl;
     return -1;
   }
 }
@@ -61,20 +59,20 @@ int HeadKinematics::TransformTargetToHeadFrame() {
   double x1, y1, z1;  // Target coordinates with respect to torso rotating link
   // double xh, yh, zh; // Target coordinates with respect to head frame (after torso lean link)
 
-  if (vb) cout << "Target in base coordinates: " << xb << " " << yb << " " << zb << endl;
+  if (vb) std::cout << "Target in base coordinates: " << xb << " " << yb << " " << zb << std::endl;
 
   x1 = xb * cos(torso_joint[0]) + yb * sin(torso_joint[0]);
   y1 = -xb * sin(torso_joint[0]) + yb * cos(torso_joint[0]);
   z1 = zb - h_rot;
-  if (vb) cout << "Target in torso rot coordinates: " << x1 << " " << y1 << " " << z1 << endl;
+  if (vb) std::cout << "Target in torso rot coordinates: " << x1 << " " << y1 << " " << z1 << std::endl;
 
   xh = x1 - h_lean * sin(torso_joint[1]);
   yh = y1;
   zh = z1 - h_lean * cos(torso_joint[1]) - h_head;
-  if (vb) cout << "Target in head coordinates: " << xh << " " << yh << " " << zh << endl;
+  if (vb) std::cout << "Target in head coordinates: " << xh << " " << yh << " " << zh << std::endl;
 }
 
-int HeadKinematics::CalculateHeadPose(double &joint_pan, double &joint_tilt) {
+int HeadKinematics::CalculateHeadPose(double *joint_pan, double *joint_tilt) {
   double theta1, theta2;
   double alpha;
   double beta;
@@ -83,29 +81,29 @@ int HeadKinematics::CalculateHeadPose(double &joint_pan, double &joint_tilt) {
   // Theta1
   if ((xh == 0) && (yh == 0)) {
     return -1;
-    if (vb) cout << "Theta1: NaN" << endl;
+    if (vb) std::cout << "Theta1: NaN" << std::endl;
   }
   theta1 = atan2(yh, xh);
   x1 = xh / cos(theta1);
   z1 = zh;
-  if (vb) cout << "Theta1: " << 180 * theta1 / M_PI << endl;
+  if (vb) std::cout << "Theta1: " << 180 * theta1 / M_PI << std::endl;
 
   // Theta2
   if ((x1 == 0) && (z1 == 0)) {
     return -1;
-    if (vb) cout << "Theta2: NaN" << endl;
+    if (vb) std::cout << "Theta2: NaN" << std::endl;
   }
   alpha = atan2(x1, -z1);
-  if (vb) cout << "Alpha: " << 180 * alpha / M_PI << endl;
+  if (vb) std::cout << "Alpha: " << 180 * alpha / M_PI << std::endl;
 
   beta = acos(h_cam / sqrt(xh * xh + yh * yh + zh * zh));
-  if (vb) cout << "Beta: " << 180 * beta / M_PI << endl;
+  if (vb) std::cout << "Beta: " << 180 * beta / M_PI << std::endl;
 
   theta2 = M_PI - (alpha + beta);
-  if (vb) cout << "Theta2: " << 180 * theta2 / M_PI << endl;
+  if (vb) std::cout << "Theta2: " << 180 * theta2 / M_PI << std::endl;
 
-  joint_pan = theta1;
-  joint_tilt = theta2;
+  *joint_pan = theta1;
+  *joint_tilt = theta2;
   return 0;
 }
 

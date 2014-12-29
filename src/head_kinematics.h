@@ -2,10 +2,10 @@
 #ifndef HEAD_KINEMATICS_H_
 #define HEAD_KINEMATICS_H_
 
-#define H_ROT   0.8d  //0.687d
-#define H_LEAN  0.375d  //0.375d
-#define H_HEAD  0.39224d  //0.385d
-#define H_CAM   0.225d  //0.200d
+#define H_ROT   0.8d
+#define H_LEAN  0.375d
+#define H_HEAD  0.39224d
+#define H_CAM   0.225d
 
 class HeadKinematics {
  public:
@@ -15,7 +15,7 @@ class HeadKinematics {
   int UpdateTargetPosition(double xx, double yy, double zz);
   int UpdateTargetPositionHeadFrame(double xx, double yy, double zz);
   int TransformTargetToHeadFrame();
-  int CalculateHeadPose(double &joint_pan, double &joint_tilt);
+  int CalculateHeadPose(double *joint_pan, double *joint_tilt);
   bool vb;  // verbose
  protected:
  private:

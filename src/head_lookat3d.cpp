@@ -71,7 +71,7 @@ class HeadLookAt3D : public RTT::TaskContext {
       h->UpdateTorsoPose(jnt_pos_(0), jnt_pos_(1));
       h->UpdateTargetPosition(current_point.position.x, current_point.position.y, current_point.position.z);
       h->TransformTargetToHeadFrame();
-      if (h->CalculateHeadPose(joint_pan, joint_tilt) == 0) {
+      if (h->CalculateHeadPose(&joint_pan, &joint_tilt) == 0) {
         head_jnt_pos_cmd_(0) = joint_pan;
         head_jnt_pos_cmd_(1) = joint_tilt;
       }

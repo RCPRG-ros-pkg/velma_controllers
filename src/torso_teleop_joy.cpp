@@ -101,15 +101,8 @@ class TorsoTeleopJoy : public RTT::TaskContext {
 
   bool startHook() {
     Eigen::VectorXd jnt_pos;
-    // Really hope some VT component is up
-    //while (port_JointPosition.read(jnt_pos) != RTT::NewData)
-    //  usleep(100);
+
     port_JointPosition.read(jnt_pos);
-
-    //torso_jnt_pos_cmd_(0) = jnt_pos(1);
-
-    //head_jnt_pos_cmd_(0) = jnt_pos(2);
-    //head_jnt_pos_cmd_(1) = jnt_pos(3);
 
     setVelX = 0.0;
     setVelY = 0.0;
