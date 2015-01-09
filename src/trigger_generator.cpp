@@ -43,7 +43,6 @@ class TriggerGenerator: public RTT::TaskContext {
   }
 
  private:
-
   RTT::OutputPort<bool> port_trigger_;
   RTT::OutputPort<std_msgs::Header> port_trigger_stamp_;
 

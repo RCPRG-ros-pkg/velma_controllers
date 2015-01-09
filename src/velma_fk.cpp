@@ -41,9 +41,9 @@ bool VelmaFK::configureHook() {
 void VelmaFK::updateHook() {
   geometry_msgs::Pose tool_left, tool_right, cmd_left, cmd_right;
   Eigen::Affine3d r[2];
-  
+
   port_joint_position_command_.read(joint_position_command_);
-  
+
   if (port_left_tool_position_command_.read(tool_left) == RTT::NewData) {
     tools_[0](0) = tool_left.position.x;
     tools_[0](1) = tool_left.position.y;
@@ -54,7 +54,7 @@ void VelmaFK::updateHook() {
     tools_[0](5) = tool_left.orientation.y;
     tools_[0](6) = tool_left.orientation.z;
   }
-  
+
   if (port_right_tool_position_command_.read(tool_right) == RTT::NewData) {
     tools_[1](0) = tool_right.position.x;
     tools_[1](1) = tool_right.position.y;
@@ -65,12 +65,12 @@ void VelmaFK::updateHook() {
     tools_[1](5) = tool_right.orientation.y;
     tools_[1](6) = tool_right.orientation.z;
   }
-  
+
   robot_->fkin(r, joint_position_command_, &tools_[0]);
-  
+
   tf::poseEigenToMsg(r[1], cmd_left);
   tf::poseEigenToMsg(r[0], cmd_right);
-  
+
   port_left_position_command_.write(cmd_left);
   port_right_position_command_.write(cmd_right);
 }
