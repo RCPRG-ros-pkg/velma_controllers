@@ -43,7 +43,7 @@
         encoder_res: 20000.0
         motor_constant: 0.105
       TorsoTiltTransmision:
-        motor_offset: 0.0
+        motor_offset: 355.0
         joint_offset: -1.57
         gear: -1.0
         encoder_res: 20000.0
