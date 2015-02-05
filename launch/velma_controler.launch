@@ -23,8 +23,10 @@
         ifname: rteth0
       FRIl:
         fri_port: 49938
+        joint_offset: [0.0,0.0075,0.0014,-0.0076,0.0050,0.0228,0.0]
       FRIr:
         fri_port: 49948
+        joint_offset: [0.0,-0.0037,-0.0069,-0.0049,-0.0126,0.0030,0.0]
       LWRlDiag:
         prefix: left_arm_
       LWRrDiag:
