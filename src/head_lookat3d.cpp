@@ -27,10 +27,21 @@
 
 class HeadLookAt3D : public RTT::TaskContext {
  public:
-  explicit HeadLookAt3D(const std::string & name) : TaskContext(name, PreOperational) {
+  explicit HeadLookAt3D(const std::string & name) : TaskContext(name, PreOperational),
+       v_rot_(V_ROT),
+       v_lean_(V_LEAN),
+       v_head_(V_HEAD),
+       h_cam_(H_CAM),
+       v_cam_(V_CAM) {
     this->ports()->addPort("HeadJointPositionCommand", port_HeadJointPositionCommand).doc("");
     this->ports()->addPort("TargetPoint", port_TargetPoint).doc("");
     this->ports()->addPort("JointPosition", port_JointPosition).doc("");
+    
+    this->addProperty("v_rot", v_rot_);
+    this->addProperty("v_lean", v_lean_);
+    this->addProperty("v_head", v_head_);
+    this->addProperty("h_cam", h_cam_);
+    this->addProperty("v_cam", v_cam_);
   }
 
   ~HeadLookAt3D() {
@@ -41,7 +52,7 @@ class HeadLookAt3D : public RTT::TaskContext {
     port_HeadJointPositionCommand.setDataSample(head_jnt_pos_cmd_);
     jnt_pos_.resize(FULL_TORSO_MNJ);
 
-    h = new HeadKinematics(H_ROT, H_LEAN, H_HEAD, H_CAM);
+    h = new HeadKinematics(v_rot_, v_lean_, v_head_, h_cam_, v_cam_);
 
     current_point.position.x = DEFAULT_TARGET_X;
     current_point.position.y = DEFAULT_TARGET_Y;
@@ -90,6 +101,12 @@ class HeadLookAt3D : public RTT::TaskContext {
   geometry_msgs::Pose current_point;
   Eigen::VectorXd head_jnt_pos_cmd_;
   Eigen::VectorXd jnt_pos_;
+  
+  double v_rot_;
+  double v_lean_;
+  double v_head_;
+  double h_cam_;
+  double v_cam_;
 };
 
 ORO_CREATE_COMPONENT(HeadLookAt3D)
