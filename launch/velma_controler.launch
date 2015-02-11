@@ -31,6 +31,12 @@
         prefix: left_arm_
       LWRrDiag:
         prefix: right_arm_
+      HeadIK:
+        v_rot:  0.800
+        v_lean: 0.375
+        v_head: 0.392
+        h_cam:  0.0
+        v_cam:  0.225
       TorsoPanTransmision:
         motor_offset: 0.0
         joint_offset: 0.0

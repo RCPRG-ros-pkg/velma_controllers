@@ -413,6 +413,10 @@ connect("FK.LeftPositionCommand", "PT.PrimaryFrame2", ConnPolicy());
 
 connect("PT.SecondaryTargetPoint", "HeadIK.TargetPoint", ConnPolicy());
 
+//stream("HeadIK.TargetPoint", ros.comm.topic("/head_lookat_pose"));
+//stream("PT.PrimaryTargetPoint", ros.comm.topic("/head_lookat_pose"));
+stream("PT.PrimaryTargetPassThrough", ros.comm.topic("/head_lookat_pose"));
+
 connect("HeadPosSplit.InputPort", "HeadIK.HeadJointPositionCommand", ConnPolicy());
 connect("TorsoPosAggregate.OutputPort", "HeadIK.JointPosition", ConnPolicy());
 
