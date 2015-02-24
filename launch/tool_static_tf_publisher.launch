@@ -1,0 +1,3 @@
+<launch>
+<node pkg="tf" type="static_transform_publisher" name="tool_tf_broadcast" args="-.3855 -.0023 -.0635 0 0 0 1 left_arm_7_link left_arm_weapon 100" />
+</launch>
