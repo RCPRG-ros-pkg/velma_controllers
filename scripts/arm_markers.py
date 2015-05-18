@@ -276,10 +276,18 @@ if __name__ == "__main__":
     # create an interactive marker server on the topic namespace simple_marker
     server = InteractiveMarkerServer(prefix+'_arm_markers')
 
-    rospy.sleep(2)
+    while not rospy.is_shutdown():
+        rospy.sleep(5)
+        time_now = rospy.Time.now() - rospy.Duration(0.5)
+        try:
+            listener.waitForTransform('torso_base', prefix+'_arm_7_link', time_now, rospy.Duration(60.0))
+            listener.waitForTransform(prefix+'_arm_7_link', prefix+'_arm_tool', time_now, rospy.Duration(60.0))
+            break
+        except:
+            print "arm_markers [%s] script: waitForTransform error, retrying in 5s..."%(prefix)
 
-    listener.waitForTransform('torso_base', prefix+'_arm_7_link', rospy.Time(0), rospy.Duration(60.0))
-    listener.waitForTransform(prefix+'_arm_7_link', prefix+'_arm_tool', rospy.Time(0), rospy.Duration(60.0))
+    if rospy.is_shutdown():
+        exit(0)
 
     getTransformations()
 
