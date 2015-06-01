@@ -7,6 +7,8 @@
   <arg name="OROCOS_TARGET" default="$(optenv OROCOS_TARGET)"/>
   <!-- Path to look for dynamically-loaded plugins and components (something like /lib/orocos) -->
   <arg name="RTT_COMPONENT_PATH" default="$(env RTT_COMPONENT_PATH)"/>
+  <!-- head target point source: True (joy) or False (topic /head_lookat_pose) -->
+  <arg name="HEAD_JOY" default="true" />
 
   <node
     name="velma_controller"
@@ -14,6 +16,7 @@
     args="--DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/velma.ops --" output="screen">
     <env name="OROCOS_TARGET" value="$(arg OROCOS_TARGET)"/>
     <env name="RTT_COMPONENT_PATH" value="$(arg RTT_COMPONENT_PATH)"/>
+    <env name="HEAD_JOY" value="$(arg HEAD_JOY)" />
   </node>
 
   <group ns="velma_controller">

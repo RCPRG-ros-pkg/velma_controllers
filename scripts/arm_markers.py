@@ -65,7 +65,6 @@ def insert6DofGlobalMarker():
 
 def globalState():
     global marker_state
-    global listener
     global prefix
 
     if marker_state == "global" or marker_state=="local":
@@ -94,16 +93,18 @@ def processFeedbackHide(feedback):
 def processFeedback(feedback):
 
     global prefix
-    global listener
     global hand_arm_transform
     global tool
     global p
     global action_trajectory_client
 
-    if feedback.marker_name == prefix+'_arm_position_marker':
-         T_B_Td = pm.fromMsg(feedback.pose)
+    if action_trajectory_client == None:
+        return
 
-    if ( feedback.event_type == InteractiveMarkerFeedback.BUTTON_CLICK and feedback.control_name == "button" ):
+    print "feedback", feedback.marker_name, feedback.control_name, feedback.event_type
+
+    if ( feedback.marker_name == prefix+'_arm_position_marker' ) and ( feedback.event_type == InteractiveMarkerFeedback.BUTTON_CLICK ) and ( feedback.control_name == "button" ):
+        T_B_Td = pm.fromMsg(feedback.pose)
         p = pm.toMsg(T_B_Td)
         duration = 5.0
 
@@ -120,47 +121,6 @@ def processFeedback(feedback):
 
         print "duration: %s"%(duration)
         print "pose: %s"%(p)
-
-def loop():
-    # start the ROS main loop
-    global prefix
-    global gripper
-    global listener
-    global T_B_W
-    global T_W_T
-
-    rospy.sleep(1)
-    rate = rospy.Rate(10.0)
-    while not rospy.is_shutdown():
-        getTransformations()
-        rate.sleep()
-
-        m = Marker()
-        m.header.frame_id = prefix+"_arm_tool"
-        m.header.stamp = rospy.Time.now()
-        m.ns = "tool_pose"
-        m.type = Marker.ARROW
-        m.scale = Point(0.15,0.005,0.005)
-
-        m.id = 0
-        ori = quaternion_about_axis(0, [0, 1 ,0])
-        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-        m.color = ColorRGBA(0.5,0,0,1)
-        pub.publish(m)
-
-        m.id = 1
-        ori = quaternion_about_axis(math.pi/2.0, [0, 0 ,1])
-        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-        m.color = ColorRGBA(0,0.5,0,1)
-        pub.publish(m)
-
-        m.id = 2
-        ori = quaternion_about_axis(-math.pi/2.0, [0, 1 ,0])
-        m.pose.orientation = Quaternion(ori[0], ori[1], ori[2], ori[3])
-        m.color = ColorRGBA(0,0,0.5,1)
-        pub.publish(m)
-
-
 
 def createSphereMarkerControl(scale, position, color):
     marker = Marker()
@@ -267,6 +227,8 @@ if __name__ == "__main__":
 
     rospy.init_node(prefix+'_arm_markers', anonymous=True)
 
+    action_trajectory_client = None
+
     T_B_W = None
     T_W_T = None
     T_T_W = None
@@ -317,6 +279,5 @@ if __name__ == "__main__":
     action_trajectory_client = actionlib.SimpleActionClient("/" + prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
     action_trajectory_client.wait_for_server()
 
-    loop()
-
+    rospy.spin()
 

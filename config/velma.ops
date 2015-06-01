@@ -1,6 +1,7 @@
 import("rtt_ros");
 import("rtt_roscomm");
 import("rtt_rosparam");
+require("os")
 
 ros.import("eigen_typekit");
 ros.import("rtt_control_msgs");
@@ -405,17 +406,20 @@ PT.loadService("rosparam");
 PT.rosparam.getAll();
 PT.configure();
 
-
-connect("TJ.PrimaryFrameSelector", "PT.PrimaryFrameSelector", ConnPolicy());
-connect("TJ.HeadTargetPoint", "PT.PrimaryTargetPoint", ConnPolicy());
-connect("FK.RightPositionCommand", "PT.PrimaryFrame1", ConnPolicy());
-connect("FK.LeftPositionCommand", "PT.PrimaryFrame2", ConnPolicy());
-
 connect("PT.SecondaryTargetPoint", "HeadIK.TargetPoint", ConnPolicy());
 
-//stream("HeadIK.TargetPoint", ros.comm.topic("/head_lookat_pose"));
+if ((os.isenv("HEAD_JOY") == false) || (os.getenv("HEAD_JOY") == "true")) then {
+  connect("TJ.PrimaryFrameSelector", "PT.PrimaryFrameSelector", ConnPolicy());
+  connect("TJ.HeadTargetPoint", "PT.PrimaryTargetPoint", ConnPolicy());
+  connect("FK.RightPositionCommand", "PT.PrimaryFrame1", ConnPolicy());
+  connect("FK.LeftPositionCommand", "PT.PrimaryFrame2", ConnPolicy());
+  stream("PT.PrimaryTargetPassThrough", ros.comm.topic("/head_lookat_pose"));
+}
+else {
+  stream("HeadIK.TargetPoint", ros.comm.topic("/head_lookat_pose"));
+}
+
 //stream("PT.PrimaryTargetPoint", ros.comm.topic("/head_lookat_pose"));
-stream("PT.PrimaryTargetPassThrough", ros.comm.topic("/head_lookat_pose"));
 
 connect("HeadPosSplit.InputPort", "HeadIK.HeadJointPositionCommand", ConnPolicy());
 connect("TorsoPosAggregate.OutputPort", "HeadIK.JointPosition", ConnPolicy());
