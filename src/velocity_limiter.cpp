@@ -37,7 +37,7 @@ class VelocityLimiter: public RTT::TaskContext {
     double position_cmd;
 
     if (port_position_in_.read(position_cmd) == RTT::NewData) {
-      if (abs(position_out_ - position_cmd) < max_vel_) {
+      if (fabs(position_out_ - position_cmd) < max_vel_) {
         position_out_ = position_cmd;
       } else if ((position_out_ - position_cmd) < 0.0) {
         position_out_ += max_vel_;
