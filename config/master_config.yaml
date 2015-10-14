@@ -1,0 +1,165 @@
+master_idx: 0
+terminals:
+ - name: head_pan
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 0
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1600
+      entries:
+       - index: 0x607A
+         subindex: 0
+         bit_length: 32
+       - index: 0x60FE
+         subindex: 1
+         bit_length: 32
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+ - name: head_tilt
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 1
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1600
+      entries:
+       - index: 0x607A
+         subindex: 0
+         bit_length: 32
+       - index: 0x60FE
+         subindex: 1
+         bit_length: 32
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+ - name: torso_pan
+   vendor_id: 0x0000009a
+   device_id: 0x00030924
+   station_alias: 0
+   station_offset: 2
+   TPDO:
+    - index: 0x1a03
+      entries:
+       - index: 0x6064
+         subindex: 0
+         bit_length: 32
+       - index: 0x60fd
+         subindex: 0
+         bit_length: 32
+       - index: 0x606c
+         subindex: 0
+         bit_length: 32
+       - index: 0x6041
+         subindex: 0
+         bit_length: 16
+    - index: 0x1a13
+      entries:
+       - index: 0x6077
+         subindex: 0
+         bit_length: 16
+   RPDO:
+    - index: 0x1602
+      entries:
+       - index: 0x6071
+         subindex: 0
+         bit_length: 16
+       - index: 0x6040
+         subindex: 0
+         bit_length: 16
+    - index: 0x160b
+      entries:
+       - index: 0x6060
+         subindex: 0
+         bit_length: 8
+domains:
+ - name: main
+   period: 1
+   drivers:
+    - name: head_pan
+      type: elmo_driver
+      terminal: head_pan
+      interpolation_period:
+        value: 1
+        index: -2
+      homing:
+        mode: 4
+        speed_high: 10000
+        speed_low: 10000
+        acceleration: 1000000
+      control_mode: position
+    - name: head_tilt
+      type: elmo_driver
+      terminal: head_tilt
+      interpolation_period:
+        value: 1
+        index: -2
+      homing:
+        mode: 4
+        speed_high: 10000
+        speed_low: 10000
+        acceleration: 1000000
+      control_mode: position
+    - name: torso_pan
+      type: elmo_driver
+      terminal: torso_pan
+      interpolation_period:
+        value: 1
+        index: -2
+      homing:
+        mode: 5
+        speed_high: 10000
+        speed_low: 10000
+        acceleration: 1000000
+      control_mode: current
