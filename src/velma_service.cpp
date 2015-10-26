@@ -35,7 +35,7 @@ class VelmaService : public controller_common::RobotService {
   }
 
   virtual int getNumberOfDofs() {
-    return 16;
+    return 15;
   }
 
   virtual int getNumberOfEffectors() {
