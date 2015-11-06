@@ -173,7 +173,7 @@ loadComponent("HeadTiltTransmisionInv", "SimpleTransmisionInv");
 HeadTiltTransmisionInv.loadService("rosparam");
 HeadTiltTransmisionInv.rosparam.getAll();
 
-connect("HeadTiltTransmisionInv.MotorCurrent", "EC.head_tilt.motor_current_comand", ConnPolicy())
+connect("HeadTiltTransmisionInv.MotorCurrent", "EC.head_tilt.motor_current_command", ConnPolicy())
 connect("HeadTiltTransmisionInv.MotorPosition", "HeadTiltVelocityLimiter.PositionIn", ConnPolicy())
 connect("HeadTiltTransmisionInv.MotorVelocity", "EC.head_tilt.motor_velocity_command", ConnPolicy())
 
@@ -302,13 +302,13 @@ loadComponent("ToolIntRight", "CartesianInterpolator")
 ToolIntRight.configure();
 ToolIntRight.loadService("rosparam");
 ToolIntRight.rosparam.getAll();
-connect("ToolIntRight.CartesianPositionCommand", "CImp.ToolPositionCommand1", ConnPolicy())
+connect("ToolIntRight.CartesianPositionCommand", "CImp.ToolPositionCommand0", ConnPolicy())
 
 loadComponent("ToolIntLeft", "CartesianInterpolator")
 ToolIntLeft.configure();
 ToolIntLeft.loadService("rosparam");
 ToolIntLeft.rosparam.getAll();
-connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand0", ConnPolicy())
+connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand1", ConnPolicy())
 
 loadComponent("TfPub", "TfPublisher")
 setActivityOnCPU("TfPub", 0.01, 1, ORO_SCHED_RT, 0)
