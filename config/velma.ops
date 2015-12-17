@@ -331,9 +331,9 @@ stream("TorquePubRight.OutTorques", ros.comm.topic("/right_arm/torques"))
 
 loadComponent("TorquePubLeft", "TorquePublisher")
 setActivityOnCPU("TorquePubLeft", 0.01, 1, ORO_SCHED_RT, 0)
-connect("FRIr.JointTorque", "TorquePubLeft.InJointTorque", ConnPolicy())
+connect("FRIl.JointTorque", "TorquePubLeft.InJointTorque", ConnPolicy())
 connect("Ts.Out1", "TorquePubLeft.InJointTorqueCommand", ConnPolicy())
-connect("FRIr.GravityTorque", "TorquePubLeft.InGravityTorque", ConnPolicy())
+connect("FRIl.GravityTorque", "TorquePubLeft.InGravityTorque", ConnPolicy())
 TorquePubLeft.configure();
 stream("TorquePubLeft.OutTorques", ros.comm.topic("/left_arm/torques"))
 
