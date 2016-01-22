@@ -25,17 +25,12 @@ def insert6DofGlobalMarker():
     global server
 
     int_position_marker = InteractiveMarker()
-    int_position_marker.header.frame_id = 'head_pan_link'
+    int_position_marker.header.frame_id = 'head_pan_motor'
     int_position_marker.name = 'head_position_marker'
     int_position_marker.scale = 0.2
-#    int_position_marker.pose = pm.toMsg(T_B_T)
 
-#    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'x'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'y'));
-    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'z'));
-#    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'x'));
-#    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'y'));
-#    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.MOVE_AXIS,'z'));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'y', InteractiveMarkerControl.FIXED));
+    int_position_marker.controls.append(createInteractiveMarkerControl6DOF(InteractiveMarkerControl.ROTATE_AXIS,'z', InteractiveMarkerControl.INHERIT));
 
     box = createAxisMarkerControl(Point(0.15,0.015,0.015), Point(0.0, 0.0, 0.0) )
     box.interaction_mode = InteractiveMarkerControl.BUTTON
@@ -46,38 +41,30 @@ def insert6DofGlobalMarker():
 
 def processFeedback(feedback):
 
-    global p
     global action_trajectory_client
 
     if action_trajectory_client == None:
         return
 
-    print "feedback", feedback.marker_name, feedback.control_name, feedback.event_type
+#    print "feedback", feedback.marker_name, feedback.control_name, feedback.event_type
 
     if ( feedback.marker_name == 'head_position_marker' ) and ( feedback.event_type == InteractiveMarkerFeedback.BUTTON_CLICK ) and ( feedback.control_name == "button" ):
         T_B_Td = pm.fromMsg(feedback.pose)
-        p = pm.toMsg(T_B_Td)
-        duration = 5.0
-
+        rz, ry, rx = T_B_Td.M.GetEulerZYX()
+        duration = 3.0
 
         action_trajectory_goal = control_msgs.msg.FollowJointTrajectoryGoal()
         
-        action_trajectory_goal.trajectory.header.stamp = rospy.Time.now() + rospy.Duration(0.1)
+        action_trajectory_goal.trajectory.header.stamp = rospy.Time.now() + rospy.Duration(0.2)
         action_trajectory_goal.trajectory.joint_names = ['head_pan_joint', 'head_tilt_joint']
         pt = trajectory_msgs.msg.JointTrajectoryPoint()
-        pt.positions = [random.uniform(-1,1), random.uniform(-0.5,0.5)]
+        pt.positions = [rz, ry]
         pt.time_from_start = rospy.Duration(duration)
-        action_trajectory_goal.trajectory.points = [pt]
-        
-#        action_trajectory_goal.trajectory.points.append(CartesianTrajectoryPoint(
-#        rospy.Duration(duration),
-#        p,
-#        Twist()))
+        action_trajectory_goal.trajectory.points.append(pt)
 
         action_trajectory_client.send_goal(action_trajectory_goal)
 
-        print "duration: %s"%(duration)
-        print "pose: %s"%(p)
+        print "moving the head in %s seconds..."%(duration)
 
 def createAxisMarkerControl(scale, position):
     markerX = Marker()
@@ -108,9 +95,9 @@ def createAxisMarkerControl(scale, position):
     control.markers.append( markerZ );
     return control
 
-def createInteractiveMarkerControl6DOF(mode, axis):
+def createInteractiveMarkerControl6DOF(mode, axis, orientation_mode):
     control = InteractiveMarkerControl()
-    control.orientation_mode = InteractiveMarkerControl.FIXED
+    control.orientation_mode = orientation_mode
     if mode == InteractiveMarkerControl.ROTATE_AXIS:
         control.name = 'rotate_';
     if mode == InteractiveMarkerControl.MOVE_AXIS:
