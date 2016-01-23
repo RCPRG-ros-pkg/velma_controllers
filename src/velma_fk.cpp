@@ -15,11 +15,11 @@
 #include "rtt/Component.hpp"
 
 VelmaFK::VelmaFK(const std::string& name) : RTT::TaskContext(name, PreOperational) {
-  this->ports()->addPort("JointPositionCommand", port_joint_position_command_);
-  this->ports()->addPort("LeftToolCommand", port_left_tool_position_command_);
-  this->ports()->addPort("RightToolCommand", port_right_tool_position_command_);
-  this->ports()->addPort("LeftPositionCommand", port_left_position_command_);
-  this->ports()->addPort("RightPositionCommand", port_right_position_command_);
+  this->ports()->addPort("JointPositionCommand_INPORT", port_joint_position_command_);
+  this->ports()->addPort("LeftToolCommand_INPORT", port_left_tool_position_command_);
+  this->ports()->addPort("RightToolCommand_INPORT", port_right_tool_position_command_);
+  this->ports()->addPort("LeftPositionCommand_OUTPORT", port_left_position_command_);
+  this->ports()->addPort("RightPositionCommand_OUTPORT", port_right_position_command_);
 }
 
 VelmaFK::~VelmaFK() {
