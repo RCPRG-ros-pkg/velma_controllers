@@ -89,7 +89,7 @@ TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
 
-stream("TJ.Joy", ros.comm.topic("/joy"));
+stream("TJ.Joy_INPORT", ros.comm.topic("/joy"));
 
 //------------------------------------------------------------------------------
 //-- Camera Trigger
@@ -393,7 +393,7 @@ VG.configure();
 connect("FRIl.GravityTorque_OUTPORT", "VG.GravTrqLeft", ConnPolicy());
 connect("FRIr.GravityTorque_OUTPORT", "VG.GravTrqRight", ConnPolicy());
 
-//connect("TJ.NullSpaceTorqueCommand", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
+//connect("TJ.NullSpaceTorqueCommand_OUTPORT", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
 connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
 
 // head look-at
@@ -411,8 +411,8 @@ PT.configure();
 connect("PT.SecondaryTargetPoint", "HeadIK.TargetPoint_INPORT", ConnPolicy());
 
 if ((os.isenv("HEAD_JOY") == false) || (os.getenv("HEAD_JOY") == "true")) then {
-  connect("TJ.PrimaryFrameSelector", "PT.PrimaryFrameSelector", ConnPolicy());
-  connect("TJ.HeadTargetPoint", "PT.PrimaryTargetPoint", ConnPolicy());
+  connect("TJ.PrimaryFrameSelector_OUTPORT", "PT.PrimaryFrameSelector", ConnPolicy());
+  connect("TJ.HeadTargetPoint_OUTPORT", "PT.PrimaryTargetPoint", ConnPolicy());
   connect("FK.RightPositionCommand_OUTPORT", "PT.PrimaryFrame1", ConnPolicy());
   connect("FK.LeftPositionCommand_OUTPORT", "PT.PrimaryFrame2", ConnPolicy());
   stream("PT.PrimaryTargetPassThrough", ros.comm.topic("/head_lookat_pose"));

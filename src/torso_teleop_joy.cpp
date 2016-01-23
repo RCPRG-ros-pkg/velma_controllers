@@ -53,17 +53,17 @@
 class TorsoTeleopJoy : public RTT::TaskContext {
  public:
   explicit TorsoTeleopJoy(const std::string & name) : TaskContext(name, PreOperational) {
-    this->ports()->addPort("HeadJointPositionCommand", port_HeadJointPositionCommand).doc("");
-    this->ports()->addPort("TorsoJointPositionCommand", port_TorsoJointPositionCommand).doc("");
-    this->ports()->addPort("TorsoJointTorqueCommand", port_TorsoJointTorqueCommand).doc("");
-    this->ports()->addPort("NullSpaceTorqueCommand", port_NullSpaceTorqueCommand).doc("");
-    this->ports()->addPort("HeadTargetPoint", port_HeadTargetPointCommand).doc("");
-    this->ports()->addPort("PrimaryFrameSelector", port_primary_frame_selector_).doc("");
+    this->ports()->addPort("HeadJointPositionCommand_OUTPORT", port_HeadJointPositionCommand).doc("");
+    this->ports()->addPort("TorsoJointPositionCommand_OUTPORT", port_TorsoJointPositionCommand).doc("");
+    this->ports()->addPort("TorsoJointTorqueCommand_OUTPORT", port_TorsoJointTorqueCommand).doc("");
+    this->ports()->addPort("NullSpaceTorqueCommand_OUTPORT", port_NullSpaceTorqueCommand).doc("");
+    this->ports()->addPort("HeadTargetPoint_OUTPORT", port_HeadTargetPointCommand).doc("");
+    this->ports()->addPort("PrimaryFrameSelector_OUTPORT", port_primary_frame_selector_).doc("");
 
-    this->ports()->addPort("JointVelocity", port_JointVelocity).doc("");
-    this->ports()->addPort("JointPosition", port_JointPosition).doc("");
+    this->ports()->addPort("JointVelocity_INPORT", port_JointVelocity).doc("");
+    this->ports()->addPort("JointPosition_INPORT", port_JointPosition).doc("");
 
-    this->ports()->addPort("Joy", port_Joy).doc("");
+    this->ports()->addPort("Joy_INPORT", port_Joy).doc("");
   }
 
   ~TorsoTeleopJoy() {
