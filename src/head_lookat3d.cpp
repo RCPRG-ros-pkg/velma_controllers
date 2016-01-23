@@ -33,9 +33,9 @@ class HeadLookAt3D : public RTT::TaskContext {
        v_head_(V_HEAD),
        h_cam_(H_CAM),
        v_cam_(V_CAM) {
-    this->ports()->addPort("HeadJointPositionCommand", port_HeadJointPositionCommand).doc("");
-    this->ports()->addPort("TargetPoint", port_TargetPoint).doc("");
-    this->ports()->addPort("JointPosition", port_JointPosition).doc("");
+    this->ports()->addPort("HeadJointPositionCommand_OUTPORT", port_HeadJointPositionCommand).doc("");
+    this->ports()->addPort("TargetPoint_INPORT", port_TargetPoint).doc("");
+    this->ports()->addPort("JointPosition_INPORT", port_JointPosition).doc("");
     
     this->addProperty("v_rot", v_rot_);
     this->addProperty("v_lean", v_lean_);
