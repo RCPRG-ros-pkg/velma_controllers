@@ -48,16 +48,16 @@ EC.configure();
 FRIr.configure();
 FRIl.configure();
 
-stream("FRIr.KRL_CMD", ros.comm.topic("/right_arm/KRL_CMD"));
-stream("FRIl.KRL_CMD", ros.comm.topic("/left_arm/KRL_CMD"));
+stream("FRIr.KRL_CMD_INPORT", ros.comm.topic("/right_arm/KRL_CMD"));
+stream("FRIl.KRL_CMD_INPORT", ros.comm.topic("/left_arm/KRL_CMD"));
 
 loadComponent("LWRrDiag", "FRIDiagnostics")
 setActivityOnCPU("LWRrDiag", 0.1, 1, ORO_SCHED_RT, 0)
 LWRrDiag.loadService("rosparam");
 LWRrDiag.rosparam.getAll();
 
-connect("FRIr.RobotState", "LWRrDiag.RobotState", ConnPolicy());
-connect("FRIr.FRIState", "LWRrDiag.FRIState", ConnPolicy());
+connect("FRIr.RobotState_OUTPORT", "LWRrDiag.RobotState", ConnPolicy());
+connect("FRIr.FRIState_OUTPORT", "LWRrDiag.FRIState", ConnPolicy());
 stream("LWRrDiag.Diagnostics", ros.comm.topic("/diagnostic"));
 LWRrDiag.configure()
 
@@ -66,8 +66,8 @@ setActivityOnCPU("LWRlDiag", 0.1, 1, ORO_SCHED_RT, 0)
 LWRlDiag.loadService("rosparam");
 LWRlDiag.rosparam.getAll();
 
-connect("FRIl.RobotState", "LWRlDiag.RobotState", ConnPolicy());
-connect("FRIl.FRIState", "LWRlDiag.FRIState", ConnPolicy());
+connect("FRIl.RobotState_OUTPORT", "LWRlDiag.RobotState", ConnPolicy());
+connect("FRIl.FRIState_OUTPORT", "LWRlDiag.FRIState", ConnPolicy());
 stream("LWRlDiag.Diagnostics", ros.comm.topic("/diagnostic"));
 LWRlDiag.configure()
 
@@ -235,13 +235,13 @@ connect("TorsoVelAggregate.InputPort_0", "TorsoPanTransmision.JointVelocity", Co
 // torqure controlled joint concate
 loadComponent("Jc", "VectorConcate3");
 connect("TorsoPosAggregate.OutputPort", "Jc.In0", ConnPolicy());
-connect("FRIr.JointPosition", "Jc.In1", ConnPolicy());
-connect("FRIl.JointPosition", "Jc.In2", ConnPolicy());
+connect("FRIr.JointPosition_OUTPORT", "Jc.In1", ConnPolicy());
+connect("FRIl.JointPosition_OUTPORT", "Jc.In2", ConnPolicy());
 
 loadComponent("Jvc", "VectorConcate3");
 connect("TorsoVelAggregate.OutputPort", "Jvc.In0", ConnPolicy());
-connect("FRIr.JointVelocity", "Jvc.In1", ConnPolicy());
-connect("FRIl.JointVelocity", "Jvc.In2", ConnPolicy());
+connect("FRIr.JointVelocity_OUTPORT", "Jvc.In1", ConnPolicy());
+connect("FRIl.JointVelocity_OUTPORT", "Jvc.In2", ConnPolicy());
 
 loadComponent("JcAll", "VectorConcate2");
 connect("Jc.Out", "JcAll.In0", ConnPolicy());
@@ -256,17 +256,17 @@ Ts.loadService("rosparam");
 Ts.rosparam.getAll();
 
 connect("Ts.Out0", "TorsoTrqSplit.InputPort", ConnPolicy());
-connect("Ts.Out1", "FRIr.JointTorqueCommand", ConnPolicy());
-connect("Ts.Out2", "FRIl.JointTorqueCommand", ConnPolicy());
+connect("Ts.Out1", "FRIr.JointTorqueCommand_INPORT", ConnPolicy());
+connect("Ts.Out2", "FRIl.JointTorqueCommand_INPORT", ConnPolicy());
 
 loadComponent("Dwr", "DecimatorWrench");
 setActivityOnCPU("Dwr", 0.01, 1, ORO_SCHED_RT, 0)
-connect("Dwr.In", "FRIr.CartesianWrench", ConnPolicy());
+connect("Dwr.In", "FRIr.CartesianWrench_OUTPORT", ConnPolicy());
 stream("Dwr.Out", ros.comm.topic("/right_arm/wrench"));
 
 loadComponent("Dwl", "DecimatorWrench");
 setActivityOnCPU("Dwl", 0.01, 1, ORO_SCHED_RT, 0)
-connect("Dwl.In", "FRIl.CartesianWrench", ConnPolicy());
+connect("Dwl.In", "FRIl.CartesianWrench_OUTPORT", ConnPolicy());
 stream("Dwl.Out", ros.comm.topic("/left_arm/wrench"));
 
 //loadComponent("Mass", "RobotMassMatrix");
@@ -275,8 +275,8 @@ Mass.loadService("robot");
 Mass.configure();
 
 connect("Jc.Out", "Mass.JointPosition", ConnPolicy());
-connect("FRIl.MassMatrix", "Mass.MassMatrixLeft", ConnPolicy());
-connect("FRIr.MassMatrix", "Mass.MassMatrixRight", ConnPolicy());
+connect("FRIl.MassMatrix_OUTPORT", "Mass.MassMatrixLeft", ConnPolicy());
+connect("FRIr.MassMatrix_OUTPORT", "Mass.MassMatrixRight", ConnPolicy());
 
 loadComponent("CImp", "CartesianImpedance");
 CImp.loadService("robot");
@@ -323,17 +323,17 @@ stream("TfPub.OutTf", ros.comm.topic("/tf"))
 
 loadComponent("TorquePubRight", "TorquePublisher")
 setActivityOnCPU("TorquePubRight", 0.01, 1, ORO_SCHED_RT, 0)
-connect("FRIr.JointTorque", "TorquePubRight.InJointTorque", ConnPolicy())
+connect("FRIr.JointTorque_OUTPORT", "TorquePubRight.InJointTorque", ConnPolicy())
 connect("Ts.Out1", "TorquePubRight.InJointTorqueCommand", ConnPolicy())
-connect("FRIr.GravityTorque", "TorquePubRight.InGravityTorque", ConnPolicy())
+connect("FRIr.GravityTorque_OUTPORT", "TorquePubRight.InGravityTorque", ConnPolicy())
 TorquePubRight.configure();
 stream("TorquePubRight.OutTorques", ros.comm.topic("/right_arm/torques"))
 
 loadComponent("TorquePubLeft", "TorquePublisher")
 setActivityOnCPU("TorquePubLeft", 0.01, 1, ORO_SCHED_RT, 0)
-connect("FRIl.JointTorque", "TorquePubLeft.InJointTorque", ConnPolicy())
+connect("FRIl.JointTorque_OUTPORT", "TorquePubLeft.InJointTorque", ConnPolicy())
 connect("Ts.Out1", "TorquePubLeft.InJointTorqueCommand", ConnPolicy())
-connect("FRIl.GravityTorque", "TorquePubLeft.InGravityTorque", ConnPolicy())
+connect("FRIl.GravityTorque_OUTPORT", "TorquePubLeft.InGravityTorque", ConnPolicy())
 TorquePubLeft.configure();
 stream("TorquePubLeft.OutTorques", ros.comm.topic("/left_arm/torques"))
 
@@ -390,8 +390,8 @@ connect("JntLimit.JointTorqueCommand", "CImp.NullSpaceTorqueCommand", ConnPolicy
 loadComponent("VG", "VelmaGrav");
 VG.configure();
 
-connect("FRIl.GravityTorque", "VG.GravTrqLeft", ConnPolicy());
-connect("FRIr.GravityTorque", "VG.GravTrqRight", ConnPolicy());
+connect("FRIl.GravityTorque_OUTPORT", "VG.GravTrqLeft", ConnPolicy());
+connect("FRIr.GravityTorque_OUTPORT", "VG.GravTrqRight", ConnPolicy());
 
 //connect("TJ.NullSpaceTorqueCommand", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
 connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand", ConnPolicy());
@@ -538,7 +538,7 @@ setActivityOnCPU("CartTrjRight", 0.01, 1, ORO_SCHED_RT, 0);
 
 connect("CartTrjRight.CartesianTrajectoryCommand", "PoseIntRight.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjRight.CartesianPositionCommand", "PoseIntRight.CartesianPositionCommand", ConnPolicy());
-connect("CartTrjRight.CartesianWrench", "FRIr.CartesianWrench", ConnPolicy());
+connect("CartTrjRight.CartesianWrench", "FRIr.CartesianWrench_OUTPORT", ConnPolicy());
 connect("FK.RightPositionCommand_OUTPORT", "CartTrjRight.CartesianPosition", ConnPolicy())
 
 stream("CartTrjRight.trajectory", ros.comm.topic("/right_arm/trajectory"));
@@ -552,7 +552,7 @@ setActivityOnCPU("CartTrjLeft", 0.01, 1, ORO_SCHED_RT, 0);
 
 connect("CartTrjLeft.CartesianTrajectoryCommand", "PoseIntLeft.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjLeft.CartesianPositionCommand", "PoseIntLeft.CartesianPositionCommand", ConnPolicy());
-connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench", ConnPolicy());
+connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench_OUTPORT", ConnPolicy());
 connect("FK.LeftPositionCommand_OUTPORT", "CartTrjLeft.CartesianPosition", ConnPolicy())
 
 stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
