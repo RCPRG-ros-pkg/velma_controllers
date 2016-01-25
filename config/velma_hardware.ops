@@ -103,19 +103,19 @@ stream("FRIl.KRL_CMD_INPORT", ros.comm.topic("/left_arm/KRL_CMD"));
 
 ## move hand action
 
-connect("rightHandMoveAction.q_out", "RightHand.q_in", ConnPolicy());
-connect("rightHandMoveAction.v_out", "RightHand.v_in", ConnPolicy());
-connect("rightHandMoveAction.t_out", "RightHand.t_in", ConnPolicy());
-connect("rightHandMoveAction.mp_out", "RightHand.mp_in", ConnPolicy());
-connect("rightHandMoveAction.hold_out", "RightHand.hold_in", ConnPolicy());
-connect("RightHand.status_out", "rightHandMoveAction.status_in", ConnPolicy());
+connect("rightHandMoveAction.q_OUTPORT", "RightHand.q_in", ConnPolicy());
+connect("rightHandMoveAction.v_OUTPORT", "RightHand.v_in", ConnPolicy());
+connect("rightHandMoveAction.t_OUTPORT", "RightHand.t_in", ConnPolicy());
+connect("rightHandMoveAction.mp_OUTPORT", "RightHand.mp_in", ConnPolicy());
+connect("rightHandMoveAction.hold_OUTPORT", "RightHand.hold_in", ConnPolicy());
+connect("RightHand.status_out", "rightHandMoveAction.status_INPORT", ConnPolicy());
 
-connect("leftHandMoveAction.q_out", "LeftHand.q_in", ConnPolicy());
-connect("leftHandMoveAction.v_out", "LeftHand.v_in", ConnPolicy());
-connect("leftHandMoveAction.t_out", "LeftHand.t_in", ConnPolicy());
-connect("leftHandMoveAction.mp_out", "LeftHand.mp_in", ConnPolicy());
-connect("leftHandMoveAction.hold_out", "LeftHand.hold_in", ConnPolicy());
-connect("LeftHand.status_out", "leftHandMoveAction.status_in", ConnPolicy());
+connect("leftHandMoveAction.q_OUTPORT", "LeftHand.q_in", ConnPolicy());
+connect("leftHandMoveAction.v_OUTPORT", "LeftHand.v_in", ConnPolicy());
+connect("leftHandMoveAction.t_OUTPORT", "LeftHand.t_in", ConnPolicy());
+connect("leftHandMoveAction.mp_OUTPORT", "LeftHand.mp_in", ConnPolicy());
+connect("leftHandMoveAction.hold_OUTPORT", "LeftHand.hold_in", ConnPolicy());
+connect("LeftHand.status_out", "leftHandMoveAction.status_INPORT", ConnPolicy());
 
 ## LWR diagnostics
 
