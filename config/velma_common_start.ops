@@ -22,6 +22,52 @@ ros.import("internal_space_spline_trajectory_action")
 ros.import("internal_space_spline_trajectory_generator")
 ros.import("port_operations")
 
+## LWR commands
+
+stream(rightKRLcmd_INPORT_name(), ros.comm.topic("/right_arm/KRL_CMD"));
+stream(leftKRLcmd_INPORT_name(), ros.comm.topic("/left_arm/KRL_CMD"));
+
+## move hand action
+
+connect("rightHandMoveAction.q_OUTPORT", rightHandPosition_INPORT_name(), ConnPolicy());
+connect("rightHandMoveAction.v_OUTPORT", rightHandVelocity_INPORT_name(), ConnPolicy());
+connect("rightHandMoveAction.t_OUTPORT", rightHandCurrent_INPORT_name(), ConnPolicy());
+connect("rightHandMoveAction.mp_OUTPORT", rightHandMaxPressure_INPORT_name(), ConnPolicy());
+connect("rightHandMoveAction.hold_OUTPORT", rightHandHold_INPORT_name(), ConnPolicy());
+connect(rightHandStatus_OUTPORT_name(), "rightHandMoveAction.status_INPORT", ConnPolicy());
+
+connect("leftHandMoveAction.v_OUTPORT", leftHandVelocity_INPORT_name(), ConnPolicy());
+connect("leftHandMoveAction.t_OUTPORT", leftHandCurrent_INPORT_name(), ConnPolicy());
+connect("leftHandMoveAction.mp_OUTPORT", leftHandMaxPressure_INPORT_name(), ConnPolicy());
+connect("leftHandMoveAction.hold_OUTPORT", leftHandHold_INPORT_name(), ConnPolicy());
+connect(leftHandStatus_OUTPORT_name(), "leftHandMoveAction.status_INPORT", ConnPolicy());
+
+## LWR diagnostics
+
+connect(rightArmRobotState_OUTPORT_name(), "LWRrDiag.RobotState_INPORT", ConnPolicy());
+connect(rightArmFRIState_OUTPORT_name(), "LWRrDiag.FRIState_INPORT", ConnPolicy());
+
+connect(leftArmRobotState_OUTPORT_name(), "LWRlDiag.RobotState_INPORT", ConnPolicy());
+connect(leftArmFRIState_OUTPORT_name(), "LWRlDiag.FRIState_INPORT", ConnPolicy());
+
+## torso transmision
+
+connect("TorsoPanTransmision.MotorPosition", torsoMotorPosition_OUTPORT_name(), ConnPolicy());
+connect("TorsoPanTransmision.MotorVelocity", torsoMotorVelocity_OUTPORT_name(), ConnPolicy());
+connect("TorsoPanTransmisionInv.MotorCurrent", torsoMotorCurrentCommand_INPORT_name(), ConnPolicy())
+
+
+
+
+connect("leftHandMoveAction.q_OUTPORT", leftHandPosition_INPORT_name(), ConnPolicy());
+
+
+connect(rightArmJointPosition_OUTPORT_name(), "Jc.In1", ConnPolicy());
+
+start_interface_components();
+
+
+
 
 
 stream("Dwr.Out", ros.comm.topic("/right_arm/wrench"));

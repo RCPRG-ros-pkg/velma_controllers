@@ -96,6 +96,18 @@ LeftHandForce.configure()
 RightHand.configure()
 RightHandTact.configure()
 
+const string leftHandPosition_INPORT_name("VelmaSim.lh_q_INPORT");
+
+void start_interface_components() {
+    EC.start();
+    FRIr.start();
+    FRIl.start();
+    LeftHand.start();
+    LeftHandForce.start();
+    RightHand.start();
+    RightHandTact.start();
+}
+
 ## LWR commands
 
 stream("FRIr.KRL_CMD_INPORT", ros.comm.topic("/right_arm/KRL_CMD"));
@@ -204,12 +216,4 @@ connect("CartTrjRight.CartesianWrench", "FRIr.CartesianWrench_OUTPORT", ConnPoli
 connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench_OUTPORT", ConnPolicy());
 
 ## start hardware interface components
-
-EC.start();
-FRIr.start();
-FRIl.start();
-LeftHand.start();
-LeftHandForce.start();
-RightHand.start();
-RightHandTact.start();
 
