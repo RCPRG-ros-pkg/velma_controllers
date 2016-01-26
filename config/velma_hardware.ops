@@ -96,8 +96,6 @@ LeftHandForce.configure()
 RightHand.configure()
 RightHandTact.configure()
 
-const string leftHandPosition_INPORT_name("VelmaSim.lh_q_INPORT");
-
 void start_interface_components() {
     EC.start();
     FRIr.start();
@@ -108,112 +106,62 @@ void start_interface_components() {
     RightHandTact.start();
 }
 
-## LWR commands
 
-stream("FRIr.KRL_CMD_INPORT", ros.comm.topic("/right_arm/KRL_CMD"));
-stream("FRIl.KRL_CMD_INPORT", ros.comm.topic("/left_arm/KRL_CMD"));
+string rightHandPosition_INPORT_name()          { return string("RightHand.q_in"); }
+string rightHandVelocity_INPORT_name()          { return string("RightHand.v_in"); }
+string rightHandCurrent_INPORT_name()           { return string("RightHand.t_in"); }
+string rightHandMaxPressure_INPORT_name()       { return string("RightHand.mp_in"); }
+string rightHandHold_INPORT_name()              { return string("RightHand.hold_in"); }
+string rightHandStatus_OUTPORT_name()           { return string("RightHand.status_out"); }
+string rightHandJointPosition_OUTPORT_name()    { return string("RightHand.q_out"); }
 
-## move hand action
+string leftHandPosition_INPORT_name()           { return string("LeftHand.q_in"); }
+string leftHandVelocity_INPORT_name()           { return string("LeftHand.v_in"); }
+string leftHandCurrent_INPORT_name()            { return string("LeftHand.t_in"); }
+string leftHandMaxPressure_INPORT_name()        { return string("LeftHand.mp_in"); }
+string leftHandHold_INPORT_name()               { return string("LeftHand.hold_in"); }
+string leftHandStatus_OUTPORT_name()            { return string("LeftHand.status_out"); }
+string leftHandJointPosition_OUTPORT_name()     { return string("LeftHand.q_out"); }
 
-connect("rightHandMoveAction.q_OUTPORT", "RightHand.q_in", ConnPolicy());
-connect("rightHandMoveAction.v_OUTPORT", "RightHand.v_in", ConnPolicy());
-connect("rightHandMoveAction.t_OUTPORT", "RightHand.t_in", ConnPolicy());
-connect("rightHandMoveAction.mp_OUTPORT", "RightHand.mp_in", ConnPolicy());
-connect("rightHandMoveAction.hold_OUTPORT", "RightHand.hold_in", ConnPolicy());
-connect("RightHand.status_out", "rightHandMoveAction.status_INPORT", ConnPolicy());
-
-connect("leftHandMoveAction.q_OUTPORT", "LeftHand.q_in", ConnPolicy());
-connect("leftHandMoveAction.v_OUTPORT", "LeftHand.v_in", ConnPolicy());
-connect("leftHandMoveAction.t_OUTPORT", "LeftHand.t_in", ConnPolicy());
-connect("leftHandMoveAction.mp_OUTPORT", "LeftHand.mp_in", ConnPolicy());
-connect("leftHandMoveAction.hold_OUTPORT", "LeftHand.hold_in", ConnPolicy());
-connect("LeftHand.status_out", "leftHandMoveAction.status_INPORT", ConnPolicy());
-
-## LWR diagnostics
-
-connect("FRIr.RobotState_OUTPORT", "LWRrDiag.RobotState_INPORT", ConnPolicy());
-connect("FRIr.FRIState_OUTPORT", "LWRrDiag.FRIState_INPORT", ConnPolicy());
-
-connect("FRIl.RobotState_OUTPORT", "LWRlDiag.RobotState_INPORT", ConnPolicy());
-connect("FRIl.FRIState_OUTPORT", "LWRlDiag.FRIState_INPORT", ConnPolicy());
-
-## torso transmision
-
-connect("TorsoPanTransmision.MotorPosition", "EC.torso_pan.motor_position", ConnPolicy());
-connect("TorsoPanTransmision.MotorVelocity", "EC.torso_pan.motor_velocity", ConnPolicy());
-connect("TorsoPanTransmisionInv.MotorCurrent", "EC.torso_pan.motor_current_command", ConnPolicy())
+string torsoMotorPosition_OUTPORT_name()        { return string("EC.torso_pan.motor_position"); }
+string torsoMotorVelocity_OUTPORT_name()        { return string("EC.torso_pan.motor_velocity"); }
+string torsoMotorCurrentCommand_INPORT_name()   { return string("EC.torso_pan.motor_current_command"); }
 
 ## camera trigger
+//string torsoMotorPosition_OUTPORT_name()        { return string("TGR.Trigger", "EC.torso.subnode0.DigitalOutput1"); }
+//string torsoMotorPosition_OUTPORT_name()        { return string("TGR.Trigger", "EC.torso.subnode0.DigitalOutput2"); }
 
-//connect("TGR.Trigger", "EC.torso.subnode0.DigitalOutput1", ConnPolicy());
-//connect("TGR.Trigger", "EC.torso.subnode0.DigitalOutput2", ConnPolicy());
+string headPanMotorPosition_OUTPORT_name()        { return string("EC.head_pan.motor_position"); }
+string headPanMotorVelocity_OUTPORT_name()        { return string("EC.head_pan.motor_velocity"); }
+string headPanMotorPositionCommand_INPORT_name()  { return string("EC.head_pan.motor_position_command"); }
+string headPanMotorVelocityCommand_INPORT_name()  { return string("EC.head_pan.motor_velocity_command"); }
+string headPanMotorCurrentCommand_INPORT_name()   { return string("EC.head_pan.motor_current_command"); }
 
-## head command limiters
+string headTiltMotorPosition_OUTPORT_name()       { return string("EC.head_tilt.motor_position"); }
+string headTiltMotorVelocity_OUTPORT_name()       { return string("EC.head_tilt.motor_velocity"); }
+string headTiltMotorPositionCommand_INPORT_name() { return string("EC.head_tilt.motor_position_command"); }
+string headTiltMotorVelocityCommand_INPORT_name() { return string("EC.head_tilt.motor_velocity_command"); }
+string headTiltMotorCurrentCommand_INPORT_name()  { return string("EC.head_tilt.motor_current_command"); }
 
-connect("HeadPanVelocityLimiter.PositionMsr", "EC.head_pan.motor_position", ConnPolicy());
-connect("HeadPanVelocityLimiter.PositionOut", "EC.head_pan.motor_position_command", ConnPolicy());
+string leftArmJointPosition_OUTPORT_name()        { return string("FRIl.JointPosition_OUTPORT"); }
+string leftArmJointVelocity_OUTPORT_name()        { return string("FRIl.JointVelocity_OUTPORT"); }
+string leftArmJointTorque_OUTPORT_name()          { return string("FRIl.JointTorque_OUTPORT"); }
+string leftArmWrench_OUTPORT_name()               { return string("FRIl.CartesianWrench_OUTPORT"); }
+string leftArmMassMatrix_OUTPORT_name()           { return string("FRIl.MassMatrix_OUTPORT"); }
+string leftArmGravityTorque_OUTPORT_name()        { return string("FRIl.GravityTorque_OUTPORT"); }
+string leftArmJointTorqueCommand_INPORT_name()    { return string("FRIl.JointTorqueCommand_INPORT"); }
+string leftKRLcmd_INPORT_name()                   { return string("FRIl.KRL_CMD_INPORT"); }
+string leftArmRobotState_OUTPORT_name()           { return string("FRIl.RobotState_OUTPORT"); }
+string leftArmFRIState_OUTPORT_name()             { return string("FRIl.FRIState_OUTPORT"); }
 
-connect("HeadTiltVelocityLimiter.PositionMsr", "EC.head_tilt.motor_position", ConnPolicy());
-connect("HeadTiltVelocityLimiter.PositionOut", "EC.head_tilt.motor_position_command", ConnPolicy());
-
-## head transmisions
-
-connect("HeadPanTransmision.MotorPosition", "EC.head_pan.motor_position", ConnPolicy());
-connect("HeadPanTransmision.MotorVelocity", "EC.head_pan.motor_velocity", ConnPolicy());
-
-connect("HeadPanTransmisionInv.MotorCurrent", "EC.head_pan.motor_current_command", ConnPolicy())
-connect("HeadPanTransmisionInv.MotorVelocity", "EC.head_pan.motor_velocity_command", ConnPolicy())
-
-connect("HeadTiltTransmision.MotorPosition", "EC.head_tilt.motor_position", ConnPolicy());
-connect("HeadTiltTransmision.MotorVelocity", "EC.head_tilt.motor_velocity", ConnPolicy());
-
-connect("HeadTiltTransmisionInv.MotorCurrent", "EC.head_tilt.motor_current_command", ConnPolicy())
-connect("HeadTiltTransmisionInv.MotorVelocity", "EC.head_tilt.motor_velocity_command", ConnPolicy())
-
-## vector concatenations and splits
-
-connect("FRIr.JointPosition_OUTPORT", "Jc.In1", ConnPolicy());
-connect("FRIl.JointPosition_OUTPORT", "Jc.In2", ConnPolicy());
-
-connect("FRIr.JointVelocity_OUTPORT", "Jvc.In1", ConnPolicy());
-connect("FRIl.JointVelocity_OUTPORT", "Jvc.In2", ConnPolicy());
-
-connect("RightHand.q_out", "JcAll.In2", ConnPolicy());
-connect("LeftHand.q_out", "JcAll.In3", ConnPolicy());
-
-connect("RightHand.q_out", "JvcAll.In2", ConnPolicy());
-connect("LeftHand.q_out", "JvcAll.In3", ConnPolicy());
-
-connect("Ts.Out1", "FRIr.JointTorqueCommand_INPORT", ConnPolicy());
-connect("Ts.Out2", "FRIl.JointTorqueCommand_INPORT", ConnPolicy());
-
-## wrench decimators
-
-connect("Dwr.In", "FRIr.CartesianWrench_OUTPORT", ConnPolicy());
-connect("Dwl.In", "FRIl.CartesianWrench_OUTPORT", ConnPolicy());
-
-## mass matrix component
-
-connect("FRIl.MassMatrix_OUTPORT", "Mass.MassMatrixLeft", ConnPolicy());
-connect("FRIr.MassMatrix_OUTPORT", "Mass.MassMatrixRight", ConnPolicy());
-
-## torque publishers
-
-connect("FRIr.JointTorque_OUTPORT", "TorquePubRight.InJointTorque", ConnPolicy())
-connect("FRIr.GravityTorque_OUTPORT", "TorquePubRight.InGravityTorque", ConnPolicy())
-
-connect("FRIl.JointTorque_OUTPORT", "TorquePubLeft.InJointTorque", ConnPolicy())
-connect("FRIl.GravityTorque_OUTPORT", "TorquePubLeft.InGravityTorque", ConnPolicy())
-
-## gravity component
-
-connect("FRIl.GravityTorque_OUTPORT", "VG.GravTrqLeft", ConnPolicy());
-connect("FRIr.GravityTorque_OUTPORT", "VG.GravTrqRight", ConnPolicy());
-
-## cartesian trajectory action
-
-connect("CartTrjRight.CartesianWrench", "FRIr.CartesianWrench_OUTPORT", ConnPolicy());
-connect("CartTrjLeft.CartesianWrench", "FRIl.CartesianWrench_OUTPORT", ConnPolicy());
-
-## start hardware interface components
+string rightArmJointPosition_OUTPORT_name()       { return string("FRIr.JointPosition_OUTPORT"); }
+string rightArmJointVelocity_OUTPORT_name()       { return string("FRIr.JointVelocity_OUTPORT"); }
+string rightArmJointTorque_OUTPORT_name()         { return string("FRIr.JointTorque_OUTPORT"); }
+string rightArmWrench_OUTPORT_name()              { return string("FRIr.CartesianWrench_OUTPORT"); }
+string rightArmMassMatrix_OUTPORT_name()          { return string("FRIr.MassMatrix_OUTPORT"); }
+string rightArmGravityTorque_OUTPORT_name()       { return string("FRIr.GravityTorque_OUTPORT"); }
+string rightArmJointTorqueCommand_INPORT_name()   { return string("FRIr.JointTorqueCommand_INPORT"); }
+string rightKRLcmd_INPORT_name()                  { return string("FRIr.KRL_CMD_INPORT"); }
+string rightArmRobotState_OUTPORT_name()          { return string("FRIr.RobotState_OUTPORT"); }
+string rightArmFRIState_OUTPORT_name()            { return string("FRIr.FRIState_OUTPORT"); }
 

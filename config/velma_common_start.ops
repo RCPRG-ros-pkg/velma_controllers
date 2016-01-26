@@ -22,6 +22,10 @@ ros.import("internal_space_spline_trajectory_action")
 ros.import("internal_space_spline_trajectory_generator")
 ros.import("port_operations")
 
+##
+## connect to the interface components
+##
+
 ## LWR commands
 
 stream(rightKRLcmd_INPORT_name(), ros.comm.topic("/right_arm/KRL_CMD"));
@@ -36,6 +40,7 @@ connect("rightHandMoveAction.mp_OUTPORT", rightHandMaxPressure_INPORT_name(), Co
 connect("rightHandMoveAction.hold_OUTPORT", rightHandHold_INPORT_name(), ConnPolicy());
 connect(rightHandStatus_OUTPORT_name(), "rightHandMoveAction.status_INPORT", ConnPolicy());
 
+connect("leftHandMoveAction.q_OUTPORT", leftHandPosition_INPORT_name(), ConnPolicy());
 connect("leftHandMoveAction.v_OUTPORT", leftHandVelocity_INPORT_name(), ConnPolicy());
 connect("leftHandMoveAction.t_OUTPORT", leftHandCurrent_INPORT_name(), ConnPolicy());
 connect("leftHandMoveAction.mp_OUTPORT", leftHandMaxPressure_INPORT_name(), ConnPolicy());
@@ -57,18 +62,85 @@ connect("TorsoPanTransmision.MotorVelocity", torsoMotorVelocity_OUTPORT_name(), 
 connect("TorsoPanTransmisionInv.MotorCurrent", torsoMotorCurrentCommand_INPORT_name(), ConnPolicy())
 
 
+## camera trigger
 
+//connect("TGR.Trigger", "EC.torso.subnode0.DigitalOutput1", ConnPolicy());
+//connect("TGR.Trigger", "EC.torso.subnode0.DigitalOutput2", ConnPolicy());
 
-connect("leftHandMoveAction.q_OUTPORT", leftHandPosition_INPORT_name(), ConnPolicy());
+## head command limiters
 
+connect("HeadPanVelocityLimiter.PositionMsr", headPanMotorPosition_OUTPORT_name(), ConnPolicy());
+connect("HeadPanVelocityLimiter.PositionOut", headPanMotorPositionCommand_INPORT_name(), ConnPolicy());
+
+connect("HeadTiltVelocityLimiter.PositionMsr", headTiltMotorPosition_OUTPORT_name(), ConnPolicy());
+connect("HeadTiltVelocityLimiter.PositionOut", headTiltMotorPositionCommand_INPORT_name(), ConnPolicy());
+
+## head transmisions
+
+connect("HeadPanTransmision.MotorPosition", headPanMotorPosition_OUTPORT_name(), ConnPolicy());
+connect("HeadPanTransmision.MotorVelocity", headPanMotorVelocity_OUTPORT_name(), ConnPolicy());
+
+connect("HeadPanTransmisionInv.MotorCurrent", headPanMotorCurrentCommand_INPORT_name(), ConnPolicy())
+connect("HeadPanTransmisionInv.MotorVelocity", headPanMotorVelocityCommand_INPORT_name(), ConnPolicy())
+
+connect("HeadTiltTransmision.MotorPosition", headTiltMotorPosition_OUTPORT_name(), ConnPolicy());
+connect("HeadTiltTransmision.MotorVelocity", headTiltMotorVelocity_OUTPORT_name(), ConnPolicy());
+
+connect("HeadTiltTransmisionInv.MotorCurrent", headTiltMotorCurrentCommand_INPORT_name(), ConnPolicy())
+connect("HeadTiltTransmisionInv.MotorVelocity", headTiltMotorVelocityCommand_INPORT_name(), ConnPolicy())
+
+## vector concatenations and splits
 
 connect(rightArmJointPosition_OUTPORT_name(), "Jc.In1", ConnPolicy());
+connect(leftArmJointPosition_OUTPORT_name(), "Jc.In2", ConnPolicy());
+
+connect(rightArmJointVelocity_OUTPORT_name(), "Jvc.In1", ConnPolicy());
+connect(leftArmJointVelocity_OUTPORT_name(), "Jvc.In2", ConnPolicy());
+
+connect(rightHandJointPosition_OUTPORT_name(), "JcAll.In2", ConnPolicy());
+connect(leftHandJointPosition_OUTPORT_name(), "JcAll.In3", ConnPolicy());
+
+connect(rightHandJointPosition_OUTPORT_name(), "JvcAll.In2", ConnPolicy());
+connect(leftHandJointPosition_OUTPORT_name(), "JvcAll.In3", ConnPolicy());
+
+connect("Ts.Out1", rightArmJointTorqueCommand_INPORT_name(), ConnPolicy());
+connect("Ts.Out2", leftArmJointTorqueCommand_INPORT_name(), ConnPolicy());
+
+## wrench decimators
+
+connect("Dwr.In", rightArmWrench_OUTPORT_name(), ConnPolicy());
+connect("Dwl.In", leftArmWrench_OUTPORT_name(), ConnPolicy());
+
+## mass matrix component
+
+connect(leftArmMassMatrix_OUTPORT_name() , "Mass.MassMatrixLeft", ConnPolicy());
+connect(rightArmMassMatrix_OUTPORT_name() , "Mass.MassMatrixRight", ConnPolicy());
+
+## torque publishers
+
+connect(rightArmJointTorque_OUTPORT_name(), "TorquePubRight.InJointTorque", ConnPolicy())
+connect(rightArmGravityTorque_OUTPORT_name(), "TorquePubRight.InGravityTorque", ConnPolicy())
+
+connect(leftArmJointTorque_OUTPORT_name(), "TorquePubLeft.InJointTorque", ConnPolicy())
+connect(leftArmGravityTorque_OUTPORT_name(), "TorquePubLeft.InGravityTorque", ConnPolicy())
+
+## gravity component
+
+connect(leftArmGravityTorque_OUTPORT_name(), "VG.GravTrqLeft", ConnPolicy());
+connect(rightArmGravityTorque_OUTPORT_name(), "VG.GravTrqRight", ConnPolicy());
+
+## cartesian trajectory action
+
+connect("CartTrjRight.CartesianWrench", rightArmWrench_OUTPORT_name(), ConnPolicy());
+connect("CartTrjLeft.CartesianWrench", leftArmWrench_OUTPORT_name(), ConnPolicy());
+
+##
+## start interface components
+##
 
 start_interface_components();
 
-
-
-
+##
 
 stream("Dwr.Out", ros.comm.topic("/right_arm/wrench"));
 stream("Dwl.Out", ros.comm.topic("/left_arm/wrench"));
@@ -84,7 +156,7 @@ rightHandMoveAction.actionlib.connect("/right_hand/move_hand");
 
 leftHandMoveAction.configure();
 leftHandMoveAction.loadService("actionlib");
-leftHandMoveAction.actionlib.connect("/right_hand/move_hand");
+leftHandMoveAction.actionlib.connect("/left_hand/move_hand");
 
 stream("LWRrDiag.Diagnostics_OUTPORT", ros.comm.topic("/diagnostic"));
 LWRrDiag.configure()
