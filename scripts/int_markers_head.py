@@ -116,12 +116,12 @@ def createInteractiveMarkerControl6DOF(mode, axis, orientation_mode):
 
 if __name__ == "__main__":
 
-    rospy.init_node('head_markers', anonymous=True)
+    rospy.init_node('int_markers_head', anonymous=True)
 
     action_trajectory_client = None
 
     # create an interactive marker server on the topic namespace simple_marker
-    server = InteractiveMarkerServer('head_markers')
+    server = InteractiveMarkerServer('int_markers_head')
 
     insert6DofGlobalMarker()
 
