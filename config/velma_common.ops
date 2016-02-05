@@ -462,6 +462,22 @@ connect("FK.RightPositionCommand_OUTPORT", "PoseIntRight.CartesianPosition", Con
 connect("FK.RightPositionCommand_OUTPORT", "TfPub.In4", ConnPolicy())
 connect("FK.LeftPositionCommand_OUTPORT", "TfPub.In5", ConnPolicy())
 
+## Force transformation
+
+# TODO
+
+#loadComponent("RightForceTransformation", "ForceTransformation")
+#RightForceTransformation.loadService("rosparam");
+#RightForceTransformation.rosparam.getAll();
+#RightForceTransformation.configure()
+
+#connect("RightForceTransformation.CurrentWristPose", "Irp6otmForwardKinematic.WristOutputPose", ConnPolicy())
+#connect("RightForceTransformation.CurrentSensorSlowFilteredWrench", "ATI3084.OutputSlowFilteredWrench", ConnPolicy())
+#connect("RightForceTransformation.CurrentSensorFastFilteredWrench", "ATI3084.OutputFastFilteredWrench", ConnPolicy())
+#connect("RightForceTransformation.Tool", "Irp6otmToolInt.CartesianPositionCommand", ConnPolicy())
+
+#stream("RightForceTransformation.ToolGravityParam", ros.comm.topic("/irp6ot_arm/tg_param"))
+
 ## ForceControlLaw
 
 loadComponent("RightForceControl", "ForceControlLaw")
