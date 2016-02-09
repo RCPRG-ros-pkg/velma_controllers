@@ -259,6 +259,8 @@ start_interface_components();
 
 ##
 
+#stream(rightArmWrench_OUTPORT_name(), ros.comm.topic("/right_arm/wrench"));
+#stream(leftArmWrench_OUTPORT_name(), ros.comm.topic("/left_arm/wrench"));
 stream("Dwr.Out", ros.comm.topic("/right_arm/wrench"));
 stream("Dwl.Out", ros.comm.topic("/left_arm/wrench"));
 
@@ -451,40 +453,54 @@ loadComponent("FK", "VelmaFK");
 FK.loadService("robot");
 FK.configure();
 
-connect("ToolIntLeft.CartesianPositionCommand", "FK.LeftToolCommand_INPORT", ConnPolicy())
-connect("ToolIntRight.CartesianPositionCommand", "FK.RightToolCommand_INPORT", ConnPolicy())
+connect("ToolIntLeft.CartesianPositionCommand", "FK.LeftTool_INPORT", ConnPolicy())
+connect("ToolIntRight.CartesianPositionCommand", "FK.RightTool_INPORT", ConnPolicy())
 
-connect("Jc.Out", "FK.JointPositionCommand_INPORT", ConnPolicy())
+connect("Jc.Out", "FK.JointPosition_INPORT", ConnPolicy())
 
-connect("FK.LeftPositionCommand_OUTPORT", "PoseIntLeft.CartesianPosition", ConnPolicy())
-connect("FK.RightPositionCommand_OUTPORT", "PoseIntRight.CartesianPosition", ConnPolicy())
+connect("FK.LeftPosition_OUTPORT", "PoseIntLeft.CartesianPosition", ConnPolicy())
+connect("FK.RightPosition_OUTPORT", "PoseIntRight.CartesianPosition", ConnPolicy())
 
-connect("FK.RightPositionCommand_OUTPORT", "TfPub.In4", ConnPolicy())
-connect("FK.LeftPositionCommand_OUTPORT", "TfPub.In5", ConnPolicy())
+connect("FK.RightPosition_OUTPORT", "TfPub.In4", ConnPolicy())
+connect("FK.LeftPosition_OUTPORT", "TfPub.In5", ConnPolicy())
 
 ## Force transformation
 
-# TODO
+loadComponent("RightForceTransformation", "ForceTransformation")
+RightForceTransformation.loadService("rosparam");
+RightForceTransformation.rosparam.getAll();
+RightForceTransformation.configure()
 
-#loadComponent("RightForceTransformation", "ForceTransformation")
-#RightForceTransformation.loadService("rosparam");
-#RightForceTransformation.rosparam.getAll();
-#RightForceTransformation.configure()
+connect("RightForceTransformation.CurrentWristPose", "FK.RightWrist_OUTPORT", ConnPolicy())
+connect("RightForceTransformation.CurrentSensorSlowFilteredWrench", rightFtSensorRawWrench_OUTPORT_name(), ConnPolicy())
+connect("RightForceTransformation.CurrentSensorFastFilteredWrench", rightFtSensorRawWrench_OUTPORT_name(), ConnPolicy())
+connect("RightForceTransformation.Tool", "ToolIntRight.CartesianPositionCommand", ConnPolicy())
 
-#connect("RightForceTransformation.CurrentWristPose", "Irp6otmForwardKinematic.WristOutputPose", ConnPolicy())
-#connect("RightForceTransformation.CurrentSensorSlowFilteredWrench", "ATI3084.OutputSlowFilteredWrench", ConnPolicy())
-#connect("RightForceTransformation.CurrentSensorFastFilteredWrench", "ATI3084.OutputFastFilteredWrench", ConnPolicy())
-#connect("RightForceTransformation.Tool", "Irp6otmToolInt.CartesianPositionCommand", ConnPolicy())
+stream("RightForceTransformation.ToolGravityParam", ros.comm.topic("/right_arm/tg_param"))
 
-#stream("RightForceTransformation.ToolGravityParam", ros.comm.topic("/irp6ot_arm/tg_param"))
+stream("RightForceTransformation.OutputEndEffectorWrench", ros.comm.topic("/right_arm/transformed_wrench"))
+
+loadComponent("LeftForceTransformation", "ForceTransformation")
+LeftForceTransformation.loadService("rosparam");
+LeftForceTransformation.rosparam.getAll();
+LeftForceTransformation.configure()
+
+connect("LeftForceTransformation.CurrentWristPose", "FK.LeftWrist_OUTPORT", ConnPolicy())
+connect("LeftForceTransformation.CurrentSensorSlowFilteredWrench", leftFtSensorRawWrench_OUTPORT_name(), ConnPolicy())
+connect("LeftForceTransformation.CurrentSensorFastFilteredWrench", leftFtSensorFastFilteredWrench_OUTPORT_name(), ConnPolicy())
+connect("LeftForceTransformation.Tool", "ToolIntLeft.CartesianPositionCommand", ConnPolicy())
+
+stream("LeftForceTransformation.ToolGravityParam", ros.comm.topic("/left_arm/tg_param"))
+
+stream("LeftForceTransformation.OutputEndEffectorWrench", ros.comm.topic("/left_arm/transformed_wrench"))
 
 ## ForceControlLaw
 
 loadComponent("RightForceControl", "ForceControlLaw")
 RightForceControl.configure()
 connect("RightForceControl.OutputEndEffectorPose", "CImp.CartPositionCommand0_INPORT", ConnPolicy())
-connect("RightForceControl.CurrentEndEffectorPose", "FK.RightPositionCommand_OUTPORT", ConnPolicy())
-connect(rightFtSensorCartesianWrench_OUTPORT_name(), "RightForceControl.CurrentEndEffectorWrench", ConnPolicy())
+connect("RightForceControl.CurrentEndEffectorPose", "FK.RightPosition_OUTPORT", ConnPolicy())
+connect("RightForceTransformation.OutputEndEffectorWrench", "RightForceControl.CurrentEndEffectorWrench", ConnPolicy())
 //connect("RightForceControl.IsSynchronisedIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
 //connect("RightForceControl.GeneratorActiveOut","Irp6otHardwareInterface.GeneratorActiveIn", ConnPolicy())
 stream("RightForceControl.CurrentFclParam", ros.comm.topic("/right_arm/fcl_param"))
@@ -492,8 +508,8 @@ stream("RightForceControl.CurrentFclParam", ros.comm.topic("/right_arm/fcl_param
 loadComponent("LeftForceControl", "ForceControlLaw")
 LeftForceControl.configure()
 connect("LeftForceControl.OutputEndEffectorPose", "CImp.CartPositionCommand0_INPORT", ConnPolicy())
-connect("LeftForceControl.CurrentEndEffectorPose", "FK.RightPositionCommand_OUTPORT", ConnPolicy())
-connect(leftFtSensorCartesianWrench_OUTPORT_name(), "LeftForceControl.CurrentEndEffectorWrench", ConnPolicy())
+connect("LeftForceControl.CurrentEndEffectorPose", "FK.LeftPosition_OUTPORT", ConnPolicy())
+connect("LeftForceTransformation.OutputEndEffectorWrench", "LeftForceControl.CurrentEndEffectorWrench", ConnPolicy())
 //connect("LeftForceControl.IsSynchronisedIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
 //connect("LeftForceControl.GeneratorActiveOut","Irp6otHardwareInterface.GeneratorActiveIn", ConnPolicy())
 stream("LeftForceControl.CurrentFclParam", ros.comm.topic("/left_arm/fcl_param"))
@@ -537,8 +553,8 @@ connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand_INPORT", ConnPolicy());
 //if ((os.isenv("HEAD_JOY") == false) || (os.getenv("HEAD_JOY") == "true")) then {
 //  connect("TJ.PrimaryFrameSelector_OUTPORT", "PT.PrimaryFrameSelector", ConnPolicy());
 //  connect("TJ.HeadTargetPoint_OUTPORT", "PT.PrimaryTargetPoint", ConnPolicy());
-//  connect("FK.RightPositionCommand_OUTPORT", "PT.PrimaryFrame1", ConnPolicy());
-//  connect("FK.LeftPositionCommand_OUTPORT", "PT.PrimaryFrame2", ConnPolicy());
+//  connect("FK.RightPosition_OUTPORT", "PT.PrimaryFrame1", ConnPolicy());
+//  connect("FK.LeftPosition_OUTPORT", "PT.PrimaryFrame2", ConnPolicy());
 //  stream("PT.PrimaryTargetPassThrough", ros.comm.topic("/head_lookat_pose"));
 //}
 //else {
@@ -608,6 +624,8 @@ addPeer("scheme", "TrajectoryGeneratorJoint");
 addPeer("scheme", "HeadTrajectoryGeneratorJoint");
 addPeer("scheme", "RightForceControl");
 addPeer("scheme", "LeftForceControl");
+addPeer("scheme", "RightForceTransformation");
+addPeer("scheme", "LeftForceTransformation");
 //addPeer("scheme", "HeadIK");
 //addPeer("scheme", "PT");
 
@@ -647,6 +665,8 @@ scheme.addBlock("TrajectoryGeneratorJoint");
 scheme.addBlock("HeadTrajectoryGeneratorJoint");
 scheme.addBlock("RightForceControl");
 scheme.addBlock("LeftForceControl");
+scheme.addBlock("RightForceTransformation");
+scheme.addBlock("LeftForceTransformation");
 //scheme.addBlock("HeadIK");
 //scheme.addBlock("PT")
 //------------------------------------------------------------------------------
@@ -674,7 +694,7 @@ JntPub.configure()
 
 connect("CartTrjRight.CartesianTrajectoryCommand", "PoseIntRight.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjRight.CartesianPositionCommand", "PoseIntRight.CartesianPositionCommand", ConnPolicy());
-connect("FK.RightPositionCommand_OUTPORT", "CartTrjRight.CartesianPosition", ConnPolicy())
+connect("FK.RightPosition_OUTPORT", "CartTrjRight.CartesianPosition", ConnPolicy())
 
 stream("CartTrjRight.trajectory", ros.comm.topic("/right_arm/trajectory"));
 
@@ -684,7 +704,7 @@ CartTrjRight.actionlib.connect("/right_arm/cartesian_trajectory")
 
 connect("CartTrjLeft.CartesianTrajectoryCommand", "PoseIntLeft.CartesianTrajectoryCommand", ConnPolicy());
 connect("CartTrjLeft.CartesianPositionCommand", "PoseIntLeft.CartesianPositionCommand", ConnPolicy());
-connect("FK.LeftPositionCommand_OUTPORT", "CartTrjLeft.CartesianPosition", ConnPolicy())
+connect("FK.LeftPosition_OUTPORT", "CartTrjLeft.CartesianPosition", ConnPolicy())
 
 stream("CartTrjLeft.trajectory", ros.comm.topic("/left_arm/trajectory"));
 
@@ -809,5 +829,4 @@ HeadTrajectoryGeneratorJoint.start();
 //PT.start()
 //HeadIK.start()
 //waitForInterrupt()
-
 

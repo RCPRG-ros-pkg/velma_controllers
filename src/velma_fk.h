@@ -32,17 +32,20 @@ class VelmaFK: public RTT::TaskContext {
   typedef Eigen::Matrix<double, 7, 1> Tool;
   typedef controller_common::Robot Robot;
 
-  RTT::OutputPort<geometry_msgs::Pose> port_left_position_command_;
-  RTT::OutputPort<geometry_msgs::Pose> port_right_position_command_;
+  RTT::OutputPort<geometry_msgs::Pose> port_left_position_out_;
+  RTT::OutputPort<geometry_msgs::Pose> port_right_position_out_;
+  RTT::OutputPort<geometry_msgs::Pose> port_left_wrist_out_;
+  RTT::OutputPort<geometry_msgs::Pose> port_right_wrist_out_;
 
-  RTT::InputPort<Eigen::VectorXd > port_joint_position_command_;
-  RTT::InputPort<geometry_msgs::Pose> port_left_tool_position_command_;
-  RTT::InputPort<geometry_msgs::Pose> port_right_tool_position_command_;
+  RTT::InputPort<Eigen::VectorXd > port_joint_position_in_;
+  RTT::InputPort<geometry_msgs::Pose> port_left_tool_position_in_;
+  RTT::InputPort<geometry_msgs::Pose> port_right_tool_position_in_;
 
 
-  Eigen::VectorXd joint_position_command_;
+  Eigen::VectorXd joint_position_in_;
   boost::shared_ptr<Robot> robot_;
   std::vector<Tool> tools_;
+  std::vector<Tool> empty_tools_;
 };
 
 #endif  // VELMA_FK_H_
