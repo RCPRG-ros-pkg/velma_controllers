@@ -29,11 +29,13 @@ ros.import("rtt_force_control_msgs");
 
 loadComponent("rightHandMoveAction","BarrettHandMoveAction")
 setActivityOnCPU("rightHandMoveAction", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { rightHandMoveAction.loadService("sim_clock_activity") }
 rightHandMoveAction.loadService("rosparam");
 rightHandMoveAction.rosparam.getAll();
 
 loadComponent("leftHandMoveAction","BarrettHandMoveAction")
 setActivityOnCPU("leftHandMoveAction", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { leftHandMoveAction.loadService("sim_clock_activity") }
 leftHandMoveAction.loadService("rosparam");
 leftHandMoveAction.rosparam.getAll();
 
@@ -41,11 +43,13 @@ leftHandMoveAction.rosparam.getAll();
 
 loadComponent("LWRrDiag", "FRIDiagnostics")
 setActivityOnCPU("LWRrDiag", 0.1, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { LWRrDiag.loadService("sim_clock_activity") }
 LWRrDiag.loadService("rosparam");
 LWRrDiag.rosparam.getAll();
 
 loadComponent("LWRlDiag", "FRIDiagnostics")
 setActivityOnCPU("LWRlDiag", 0.1, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { LWRlDiag.loadService("sim_clock_activity") }
 LWRlDiag.loadService("rosparam");
 LWRlDiag.rosparam.getAll();
 
@@ -102,9 +106,11 @@ Ts.rosparam.getAll();
 ## load wrench decimators
 loadComponent("Dwr", "DecimatorWrench");
 setActivityOnCPU("Dwr", 0.01, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { Dwr.loadService("sim_clock_activity") }
 
 loadComponent("Dwl", "DecimatorWrench");
 setActivityOnCPU("Dwl", 0.01, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { Dwl.loadService("sim_clock_activity") }
 
 ## load mass matrix component
 
@@ -117,9 +123,11 @@ Mass.configure();
 
 loadComponent("TorquePubRight", "TorquePublisher")
 setActivityOnCPU("TorquePubRight", 0.01, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { TorquePubRight.loadService("sim_clock_activity") }
 
 loadComponent("TorquePubLeft", "TorquePublisher")
 setActivityOnCPU("TorquePubLeft", 0.01, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { TorquePubLeft.loadService("sim_clock_activity") }
 
 ## load gravity component
 
@@ -129,14 +137,17 @@ VG.configure();
 ## load cartesian trajectory action
 loadComponent("CartTrjRight", "CartesianTrajectoryAction");
 setActivityOnCPU("CartTrjRight", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartTrjRight.loadService("sim_clock_activity") }
 
 loadComponent("CartTrjLeft", "CartesianTrajectoryAction");
 setActivityOnCPU("CartTrjLeft", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartTrjLeft.loadService("sim_clock_activity") }
 
 ## load camera trigger
 
 loadComponent("TGR", "TriggerGenerator");
 setActivityOnCPU("TGR", 0.1, 2, ORO_SCHED_RT, 1);
+if (useSimulationTime()) then { TGR.loadService("sim_clock_activity") }
 TGR.configure();
 
 ##
@@ -289,6 +300,7 @@ LWRlDiag.configure()
 loadComponent("scheme", "conman::Scheme");
 
 setActivityOnCPU("scheme", 0.001, 5, ORO_SCHED_RT, 3);
+if (useSimulationTime()) then { scheme.loadService("sim_clock_activity") }
 
 scheme.loadService("conman_ros");
 
@@ -300,6 +312,7 @@ scheme.configure();
 
 loadComponent("TJ", "TorsoTeleopJoy")
 setActivityOnCPU("TJ", 0.01, 6, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { TJ.loadService("sim_clock_activity") }
 TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
@@ -413,6 +426,7 @@ connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand1_INPOR
 
 loadComponent("TfPub", "TfPublisher")
 setActivityOnCPU("TfPub", 0.01, 1, ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { TfPub.loadService("sim_clock_activity") }
 TfPub.loadService("rosparam");
 TfPub.rosparam.getAll();
 TfPub.configure();
@@ -472,7 +486,7 @@ RightForceTransformation.rosparam.getAll();
 RightForceTransformation.configure()
 
 connect("RightForceTransformation.CurrentWristPose", "FK.RightWrist_OUTPORT", ConnPolicy())
-connect("RightForceTransformation.CurrentSensorSlowFilteredWrench", rightFtSensorRawWrench_OUTPORT_name(), ConnPolicy())
+connect("RightForceTransformation.CurrentSensorSlowFilteredWrench", rightFtSensorSlowFilteredWrench_OUTPORT_name(), ConnPolicy())
 connect("RightForceTransformation.CurrentSensorFastFilteredWrench", rightFtSensorRawWrench_OUTPORT_name(), ConnPolicy())
 connect("RightForceTransformation.Tool", "ToolIntRight.CartesianPositionCommand", ConnPolicy())
 
@@ -675,6 +689,7 @@ scheme.addBlock("LeftForceTransformation");
 
 loadComponent("JntPub", "JointStatePublisher");
 setActivityOnCPU("JntPub", 0.002, 2, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { JntPub.loadService("sim_clock_activity") }
 JntPub.loadService("rosparam");
 JntPub.rosparam.getAll();
 
@@ -716,6 +731,7 @@ CartTrjLeft.actionlib.connect("/left_arm/cartesian_trajectory")
 
 loadComponent("SplineTrajectoryActionJoint", "InternalSpaceSplineTrajectoryAction")
 setActivityOnCPU("SplineTrajectoryActionJoint", 0.01 ,2 ,ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { SplineTrajectoryActionJoint.loadService("sim_clock_activity") }
 SplineTrajectoryActionJoint.loadService("rosparam");
 SplineTrajectoryActionJoint.rosparam.getAll();
 SplineTrajectoryActionJoint.loadService("actionlib")
@@ -727,6 +743,7 @@ SplineTrajectoryActionJoint.configure()
 
 loadComponent("HeadSplineTrajectoryActionJoint", "InternalSpaceSplineTrajectoryAction")
 setActivityOnCPU("HeadSplineTrajectoryActionJoint", 0.01 ,2 ,ORO_SCHED_RT, 0)
+if (useSimulationTime()) then { HeadSplineTrajectoryActionJoint.loadService("sim_clock_activity") }
 HeadSplineTrajectoryActionJoint.loadService("rosparam");
 HeadSplineTrajectoryActionJoint.rosparam.getAll();
 HeadSplineTrajectoryActionJoint.loadService("actionlib")
@@ -740,6 +757,7 @@ HeadSplineTrajectoryActionJoint.configure()
 
 loadComponent("CartToolRight", "CartesianTrajectoryAction");
 setActivityOnCPU("CartToolRight", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartToolRight.loadService("sim_clock_activity") }
 CartToolRight.configure()
 CartToolRight.loadService("actionlib")
 CartToolRight.actionlib.connect("/right_arm/tool_trajectory")
@@ -747,6 +765,7 @@ connect("CartToolRight.CartesianTrajectoryCommand","ToolIntRight.CartesianTrajec
 
 loadComponent("CartToolLeft", "CartesianTrajectoryAction");
 setActivityOnCPU("CartToolLeft", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartToolLeft.loadService("sim_clock_activity") }
 CartToolLeft.configure()
 CartToolLeft.loadService("actionlib")
 CartToolLeft.actionlib.connect("/left_arm/tool_trajectory")
@@ -756,6 +775,7 @@ connect("CartToolLeft.CartesianTrajectoryCommand","ToolIntLeft.CartesianTrajecto
 
 loadComponent("CartImpRight", "CartesianImpedanceAction");
 setActivityOnCPU("CartImpRight", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartImpRight.loadService("sim_clock_activity") }
 
 connect("CartImpRight.CartesianImpedanceTrajectoryCommand_OUTPORT", "ImpedanceIntRight.CartesianImpedanceTrajectoryCommand", ConnPolicy());
 
@@ -767,6 +787,7 @@ CartImpRight.actionlib.connect("/right_arm/cartesian_impedance")
 
 loadComponent("CartImpLeft", "CartesianImpedanceAction");
 setActivityOnCPU("CartImpLeft", 0.01, 1, ORO_SCHED_RT, 0);
+if (useSimulationTime()) then { CartImpLeft.loadService("sim_clock_activity") }
 
 connect("CartImpLeft.CartesianImpedanceTrajectoryCommand_OUTPORT", "ImpedanceIntLeft.CartesianImpedanceTrajectoryCommand", ConnPolicy());
 
