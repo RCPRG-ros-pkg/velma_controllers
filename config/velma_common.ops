@@ -811,6 +811,8 @@ HeadPanTransmision.start();
 HeadPanTransmisionInv.start();
 HeadTiltTransmision.start();
 HeadTiltTransmisionInv.start();
+HeadPanVelocityLimiter.start();
+HeadTiltVelocityLimiter.start();
 HeadPosSplit.start();
 TorsoTrqSplit.start();
 TorsoPosAggregate.start();
@@ -846,7 +848,6 @@ HeadSplineTrajectoryActionJoint.start();
 FK.start();
 rightHandMoveAction.start();
 leftHandMoveAction.start();
-HeadTrajectoryGeneratorJoint.start();
 //PT.start()
 //HeadIK.start()
 //waitForInterrupt()
