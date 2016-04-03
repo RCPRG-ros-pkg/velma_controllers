@@ -521,7 +521,7 @@ stream("RightForceControl.CurrentFclParam", ros.comm.topic("/right_arm/fcl_param
 
 loadComponent("LeftForceControl", "ForceControlLaw")
 LeftForceControl.configure()
-connect("LeftForceControl.OutputEndEffectorPose", "CImp.CartPositionCommand0_INPORT", ConnPolicy())
+connect("LeftForceControl.OutputEndEffectorPose", "CImp.CartPositionCommand1_INPORT", ConnPolicy())
 connect("LeftForceControl.CurrentEndEffectorPose", "FK.LeftPosition_OUTPORT", ConnPolicy())
 connect("LeftForceTransformation.OutputEndEffectorWrench", "LeftForceControl.CurrentEndEffectorWrench", ConnPolicy())
 //connect("LeftForceControl.IsSynchronisedIn","Irp6otHardwareInterface.IsSynchronised", ConnPolicy())
