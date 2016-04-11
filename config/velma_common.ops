@@ -26,8 +26,8 @@ ros.import("force_control");
 ros.import("rtt_force_control_msgs");
 
 // dot graph generation
-ros.import("rtt_dot_service")
-loadService("gazebo","dot")
+//ros.import("rtt_dot_service")
+//loadService("gazebo","dot")
 
 ## Load a BarrettHand move action
 
