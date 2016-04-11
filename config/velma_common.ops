@@ -25,6 +25,10 @@ ros.import("port_operations")
 ros.import("force_control");
 ros.import("rtt_force_control_msgs");
 
+// dot graph generation
+ros.import("rtt_dot_service")
+loadService("gazebo","dot")
+
 ## Load a BarrettHand move action
 
 loadComponent("rightHandMoveAction","BarrettHandMoveAction")
@@ -851,4 +855,8 @@ leftHandMoveAction.start();
 //PT.start()
 //HeadIK.start()
 //waitForInterrupt()
+
+// dot graph generation
+//dot.dot_file="/home/dseredyn/ws_sim_full/oro.dot"
+//dot.generate();
 
