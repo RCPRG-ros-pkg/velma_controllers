@@ -37,8 +37,8 @@ class IntMarkersCimp:
             rospy.sleep(1)
             time_now = rospy.Time.now() - rospy.Duration(0.5)
             try:
-                self.listener.waitForTransform('torso_base', self.prefix+'_arm_7_link', time_now, rospy.Duration(60.0))
-                self.listener.waitForTransform(self.prefix+'_arm_7_link', self.prefix+'_arm_tool', time_now, rospy.Duration(60.0))
+                self.listener.waitForTransform('torso_base', self.prefix+'_arm_7_link', time_now, rospy.Duration(1.0))
+                self.listener.waitForTransform(self.prefix+'_arm_7_link', self.prefix+'_arm_tool', time_now, rospy.Duration(1.0))
                 break
             except:
                 print "int_markers_cimp_[%s] script: waitForTransform error, retrying in 1s..."%(self.prefix)
