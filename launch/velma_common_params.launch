@@ -1,33 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="LOG_LEVEL" default="error"/>
-  <arg name="DEBUG" default="false"/>
-
-  <!-- Orocos target (gnulinux, xenomai, etc) -->
-  <arg name="OROCOS_TARGET" default="$(optenv OROCOS_TARGET)"/>
-  <!-- Path to look for dynamically-loaded plugins and components (something like /lib/orocos) -->
-  <arg name="RTT_COMPONENT_PATH" default="$(env RTT_COMPONENT_PATH)"/>
-  <!-- head target point source: True (joy) or False (topic /head_lookat_pose) -->
-  <arg name="HEAD_JOY" default="true" />
-
-  <node
-    name="velma_controller"
-    pkg="rtt_ros" type="deployer"
-    args="--DeployerName lwr_controller -l $(arg LOG_LEVEL) -s $(find velma_controller)/config/velma.ops --" output="screen">
-    <env name="OROCOS_TARGET" value="$(arg OROCOS_TARGET)"/>
-    <env name="RTT_COMPONENT_PATH" value="$(arg RTT_COMPONENT_PATH)"/>
-    <env name="HEAD_JOY" value="$(arg HEAD_JOY)" />
-  </node>
-
-  <group ns="velma_controller">
-    <param name="EC/master_config" command="cat $(find velma_controller)/config/master_config.yaml"/>
     <rosparam>
-      FRIl:
-        fri_port: 49938
-        joint_offset: [0.0,0.0,0.0,-0.0,0.0,0.0,0.0]
-      FRIr:
-        fri_port: 49948
-        joint_offset: [0.0,-0.0,-0.0,-0.0,-0.0,0.0,0.0]
       rightHandMoveAction:
         prefix: right
       leftHandMoveAction:
@@ -115,6 +88,8 @@
         max_trq: [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 6.0, 6.0, 10.0, 10.0, 10.0, 10.0, 10.0, 6.0, 6.0]
       JntPub:
         joint_names: [torso_0_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint, head_pan_joint, head_tilt_joint, right_HandFingerOneKnuckleOneJoint, right_HandFingerOneKnuckleTwoJoint, right_HandFingerOneKnuckleThreeJoint, right_HandFingerTwoKnuckleOneJoint, right_HandFingerTwoKnuckleTwoJoint, right_HandFingerTwoKnuckleThreeJoint, right_HandFingerThreeKnuckleTwoJoint, right_HandFingerThreeKnuckleThreeJoint, left_HandFingerOneKnuckleOneJoint, left_HandFingerOneKnuckleTwoJoint, left_HandFingerOneKnuckleThreeJoint, left_HandFingerTwoKnuckleOneJoint, left_HandFingerTwoKnuckleTwoJoint, left_HandFingerTwoKnuckleThreeJoint, left_HandFingerThreeKnuckleTwoJoint, left_HandFingerThreeKnuckleThreeJoint ]
+        constant_names: [leftFtSensorJoint, rightFtSensorJoint]
+        constant_positions: [0, 0]
       PT:
         input_frames: 2
       ToolIntRight:
@@ -145,5 +120,4 @@
         frame_ids: [right_arm_7_link, left_arm_7_link, torso_base, torso_base, torso_base, torso_base]
         child_frame_ids: [right_arm_tool, left_arm_tool, right_arm_cmd, left_arm_cmd, right_arm_tool_measured, left_arm_tool_measured]
     </rosparam>
-  </group>
 </launch>
