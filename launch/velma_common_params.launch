@@ -1,6 +1,40 @@
 <?xml version="1.0"?>
 <launch>
     <rosparam>
+      RightForceTransformation:
+        is_right_turn_frame: true
+        tool_weight: 12.391
+        gravity_arm_in_wrist:
+          x: 0.0
+          y: 0.0
+          z: 0.08
+        sensor_frame:
+          orientation:
+            w: 1.0
+            x: 0.0
+            y: 0.0
+            z: 0.0
+          position:
+            x: 0.0
+            y: 0.0
+            z: 0.0
+      LeftForceTransformation:
+        is_right_turn_frame: true
+        tool_weight: 12.391
+        gravity_arm_in_wrist:
+          x: 0.0
+          y: 0.0
+          z: 0.08
+        sensor_frame:
+          orientation:
+            w: 1.0
+            x: 0.0
+            y: 0.0
+            z: 0.0
+          position:
+            x: 0.0
+            y: 0.0
+            z: 0.0
       rightHandMoveAction:
         prefix: right
       leftHandMoveAction:
