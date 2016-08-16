@@ -1,0 +1,50 @@
+initial_behavior: idle
+switchable_components: [CImp, JntLimit, PoseIntRight, PoseIntLeft, JntImp, TrajectoryGeneratorJoint, RightForceControl, LeftForceControl, RightForceTransformation, LeftForceTransformation, lli_hi_tx]
+behaviors: 
+  - name: idle
+    running: []
+  - name: CartImp
+    running: [CImp, JntLimit, PoseIntLeft, PoseIntRight, lli_hi_tx]
+  - name: JntImp
+    running: [JntImp, TrajectoryGeneratorJoint, lli_hi_tx]
+  - name: CartFCL
+    running: [CImp, PoseIntRight, PoseIntLeft, RightForceControl, LeftForceControl, RightForceTransformation, LeftForceTransformation, lli_hi_tx]
+
+# components that always run
+#TorsoPanTransmision
+#TorsoPanTransmisionInv
+#HeadPanVelocityLimiter
+#HeadTiltVelocityLimiter
+#HeadPanTransmision
+#HeadPanTransmisionInv
+#HeadTiltTransmision
+#HeadTiltTransmisionInv
+#HeadPosAggregate
+#HeadPosSplit
+#Jc
+#Jvc
+#JcAll
+#JvcAll
+#Mass
+#Ts
+#ImpedanceIntRight
+#ImpedanceIntLeft
+#VG
+#ToolIntRight
+#ToolIntLeft
+#FK
+#HeadTrajectoryGeneratorJoint
+
+# components that are switchable
+#CImp
+#JntLimit
+#PoseIntRight
+#PoseIntLeft
+#JntImp
+#TrajectoryGeneratorJoint
+#RightForceControl
+#LeftForceControl
+#RightForceTransformation
+#LeftForceTransformation
+#lli_hi_tx
+
