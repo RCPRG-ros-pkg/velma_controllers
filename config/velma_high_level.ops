@@ -36,6 +36,7 @@ bool useSimulationTime()   { return false; }
 //ros.import("rtt_dot_service")
 //loadService("gazebo","dot")
 
+
 #
 # the low-level interface
 #
@@ -48,14 +49,10 @@ setActivity("lli_hi_rx", 0, 1, ORO_SCHED_RT);
 lli_hi_rx.configure();
 stream("lli_hi_rx.status_INPORT", cpRx);
 
-#var ConnPolicy cpTx;
-#cpTx.transport = 2;                 # the MQueue protocol id
-#cpTx.name_id   = "/lli_command";    # the connection id
 
 loadComponent("lli_hi_tx","VelmaLLIHiTx")
 setActivity("lli_hi_tx", 0, 1, ORO_SCHED_RT);
 lli_hi_tx.configure();
-#stream("lli_hi_tx.command_OUTPORT", cpTx);
 
 
 
@@ -402,9 +399,21 @@ HeadPosSplit.configure()
 connect("HeadPosSplit.OutputPort_0", "HeadPanTransmisionInv.JointPosition", ConnPolicy())
 connect("HeadPosSplit.OutputPort_1", "HeadTiltTransmisionInv.JointPosition", ConnPolicy())
 
-connect("TorsoPanTransmision.JointPosition", "Jc.In0", ConnPolicy());
+// Torso Position port aggregate
+loadComponent("TorsoPosAggregate","PortDoubleAggregate")
+TorsoPosAggregate.loadService("rosparam")
+TorsoPosAggregate.rosparam.getAll()
+TorsoPosAggregate.configure()
+connect("TorsoPosAggregate.OutputPort", "Jc.In0", ConnPolicy());
+connect("TorsoPanTransmision.JointPosition", "TorsoPosAggregate.InputPort_0", ConnPolicy())
 
-connect("TorsoPanTransmision.JointVelocity", "Jvc.In0", ConnPolicy())
+// Torso Velocity port aggregate
+loadComponent("TorsoVelAggregate","PortDoubleAggregate")
+TorsoVelAggregate.loadService("rosparam")
+TorsoVelAggregate.rosparam.getAll()
+TorsoVelAggregate.configure()
+connect("TorsoVelAggregate.OutputPort", "Jvc.In0", ConnPolicy());
+connect("TorsoPanTransmision.JointVelocity", "TorsoVelAggregate.InputPort_0", ConnPolicy())
 
 connect("Jc.Out", "JcAll.In0", ConnPolicy());
 connect("HeadPosAggregate.OutputPort", "JcAll.In1", ConnPolicy());
@@ -412,7 +421,14 @@ connect("HeadPosAggregate.OutputPort", "JcAll.In1", ConnPolicy());
 connect("Jvc.Out", "JvcAll.In0", ConnPolicy());
 
 #connect("Ts.Out0", "TorsoTrqSplit.InputPort", ConnPolicy());
-connect("Ts.Out0", "TorsoPanTransmisionInv.JointTorque", ConnPolicy());
+
+// Torso torque port spliter
+loadComponent("TorsoTrqSplit","PortDoubleSplit")
+TorsoTrqSplit.loadService("rosparam")
+TorsoTrqSplit.rosparam.getAll()
+TorsoTrqSplit.configure()
+connect("TorsoTrqSplit.OutputPort_0", "TorsoPanTransmisionInv.JointTorque", ConnPolicy())
+connect("Ts.Out0", "TorsoTrqSplit.InputPort", ConnPolicy());
 
 connect("HeadVelAggregate.OutputPort", "JvcAll.In1", ConnPolicy());
 
@@ -638,6 +654,9 @@ addPeer("scheme", "HeadTiltTransmision")
 addPeer("scheme", "HeadTiltTransmisionInv")
 addPeer("scheme", "HeadPosAggregate")
 addPeer("scheme", "HeadPosSplit")
+addPeer("scheme", "TorsoTrqSplit")
+addPeer("scheme", "TorsoPosAggregate")
+addPeer("scheme", "TorsoVelAggregate")
 addPeer("scheme", "Jc");
 addPeer("scheme", "Jvc");
 addPeer("scheme", "JcAll");
@@ -675,6 +694,9 @@ scheme.addBlock("HeadTiltTransmision");
 scheme.addBlock("HeadTiltTransmisionInv");
 scheme.addBlock("HeadPosAggregate");
 scheme.addBlock("HeadPosSplit");
+scheme.addBlock("TorsoTrqSplit");
+scheme.addBlock("TorsoPosAggregate");
+scheme.addBlock("TorsoVelAggregate");
 scheme.addBlock("Jc");
 scheme.addBlock("Jvc");
 scheme.addBlock("JcAll");
@@ -836,6 +858,9 @@ HeadPanVelocityLimiter.start();
 HeadTiltVelocityLimiter.start();
 HeadPosSplit.start();
 HeadPosAggregate.start();
+TorsoTrqSplit.start();
+TorsoPosAggregate.start();
+TorsoVelAggregate.start();
 Jc.start();
 Jvc.start();
 JcAll.start();

@@ -92,6 +92,12 @@
         number_of_ports: 2
       HeadPosSplit:
         number_of_ports: 2
+      TorsoTrqSplit:
+        number_of_ports: 1
+      TorsoPosAggregate:
+        number_of_ports: 1
+      TorsoVelAggregate:
+        number_of_ports: 1
       Ts:
         outputs: [1, 7, 7]
       TrajectoryGeneratorJoint:
