@@ -29,6 +29,9 @@ ros.import("rtt_force_control_msgs");
 ros.import("rtt_velma_low_level_interface_msgs");
 ros.import("velma_low_level_interface");
 
+ros.import("rtt_behavior_manager_msgs");
+ros.import("behavior_manager");
+
 
 bool useSimulationTime()   { return false; }
 
@@ -346,7 +349,10 @@ scheme.loadService("conman_ros");
 
 scheme.configure();
 
-setMasterSlaveActivity("lli_hi_rx", "scheme");
+#setMasterSlaveActivity("lli_hi_rx", "scheme");
+
+
+
 
 //------------------------------------------------------------------------------
 //-- Torso Joystick Teleop
@@ -839,6 +845,16 @@ CartImpLeft.configure();
 CartImpLeft.loadService("actionlib")
 CartImpLeft.actionlib.connect("/left_arm/cartesian_impedance")
 
+
+loadComponent("bm","BehaviorManager");
+setActivity("bm", 0, 1, ORO_SCHED_RT);
+bm.loadService("rosparam");
+bm.rosparam.getAll();
+addPeer("bm", "scheme");
+bm.configure();
+
+setMasterSlaveActivity("lli_hi_rx", "bm");
+
 //------------------------------------------------------------------------------
 
 lli_hi_rx.start();
@@ -895,9 +911,12 @@ leftHandMoveAction.start();
 //HeadIK.start()
 //waitForInterrupt()
 
+
 lli_hi_tx.start();
 
 scheme.start();
+
+bm.start();
 
 // dot graph generation
 //dot.dot_file="/home/dseredyn/ws_sim_full/oro.dot"
