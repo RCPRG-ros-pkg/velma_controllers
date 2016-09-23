@@ -13,7 +13,7 @@ ros.import("rtt_control_msgs");
 ros.import("rtt_rosclock");
 ros.import("conman");
 ros.import("conman_ros");
-ros.import("lwr_fri");
+##ros.import("lwr_fri");
 ros.import("oro_joint_state_publisher");
 ros.import("controller_common");
 ros.import("velma_controller");
@@ -81,20 +81,6 @@ setActivityOnCPU("leftHandMoveAction", 0.01, 1, ORO_SCHED_RT, 0);
 if (useSimulationTime()) then { leftHandMoveAction.loadService("sim_clock_activity") }
 leftHandMoveAction.loadService("rosparam");
 leftHandMoveAction.rosparam.getAll();
-
-## load diagnostics components for KUKA LWR
-
-loadComponent("LWRrDiag", "FRIDiagnostics")
-setActivityOnCPU("LWRrDiag", 0.1, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { LWRrDiag.loadService("sim_clock_activity") }
-LWRrDiag.loadService("rosparam");
-LWRrDiag.rosparam.getAll();
-
-loadComponent("LWRlDiag", "FRIDiagnostics")
-setActivityOnCPU("LWRlDiag", 0.1, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { LWRlDiag.loadService("sim_clock_activity") }
-LWRlDiag.loadService("rosparam");
-LWRlDiag.rosparam.getAll();
 
 ## load head command limiters
 
@@ -199,8 +185,8 @@ TGR.configure();
 
 ## LWR commands
 
-stream("lli_hi_tx.cmd_rArm_cmd_INPORT", ros.comm.topic("/right_arm/KRL_CMD"));
-stream("lli_hi_tx.cmd_lArm_cmd_INPORT", ros.comm.topic("/left_arm/KRL_CMD"));
+#stream("lli_hi_tx.cmd_rArm_cmd_INPORT", ros.comm.topic("/right_arm/KRL_CMD"));
+#stream("lli_hi_tx.cmd_lArm_cmd_INPORT", ros.comm.topic("/left_arm/KRL_CMD"));
 
 ## move hand action
 
@@ -217,14 +203,6 @@ connect("leftHandMoveAction.t_OUTPORT",     "lli_hi_tx.cmd_lHand_max_i_INPORT", 
 #connect("leftHandMoveAction.mp_OUTPORT",    "lli_hi_tx.cmd_lHand_max_p_INPORT", ConnPolicy()); # TODO
 #connect("leftHandMoveAction.hold_OUTPORT",  "lli_hi_tx.cmd_lHand_hold_INPORT", ConnPolicy());  # TODO
 connect("lli_hi_rx.status_lHand_s_OUTPORT", "leftHandMoveAction.status_INPORT", ConnPolicy());
-
-## LWR diagnostics
-
-connect("lli_hi_rx.status_rArm_friRobotState_OUTPORT",  "LWRrDiag.RobotState_INPORT", ConnPolicy());
-connect("lli_hi_rx.status_rArm_friIntfState_OUTPORT",   "LWRrDiag.FRIState_INPORT", ConnPolicy());
-
-connect("lli_hi_rx.status_lArm_friRobotState_OUTPORT",  "LWRlDiag.RobotState_INPORT", ConnPolicy());
-connect("lli_hi_rx.status_lArm_friIntfState_OUTPORT",   "LWRlDiag.FRIState_INPORT", ConnPolicy());
 
 ## torso transmision
 
@@ -330,12 +308,6 @@ rightHandMoveAction.actionlib.connect("/right_hand/move_hand");
 leftHandMoveAction.configure();
 leftHandMoveAction.loadService("actionlib");
 leftHandMoveAction.actionlib.connect("/left_hand/move_hand");
-
-stream("LWRrDiag.Diagnostics_OUTPORT", ros.comm.topic("/diagnostic"));
-LWRrDiag.configure()
-
-stream("LWRlDiag.Diagnostics_OUTPORT", ros.comm.topic("/diagnostic"));
-LWRlDiag.configure()
 
 //------------------------------------------------------------------------------
 //-- Controller manager
@@ -731,6 +703,7 @@ scheme.addBlock("LeftForceTransformation");
 scheme.addBlock("lli_hi_tx");
 //scheme.addBlock("HeadIK");
 //scheme.addBlock("PT")
+
 //------------------------------------------------------------------------------
 //-- ROS Diagnostics
 //------------------------------------------------------------------------------
@@ -854,13 +827,11 @@ addPeer("bm", "scheme");
 bm.configure();
 
 setMasterSlaveActivity("lli_hi_rx", "bm");
+connect("bm.cmd_sc_OUTPORT","lli_hi_tx.cmd_safety_controller_cmd_INPORT", ConnPolicy())
 
 //------------------------------------------------------------------------------
 
 lli_hi_rx.start();
-
-LWRrDiag.start();
-LWRlDiag.start();
 
 TJ.start();
 

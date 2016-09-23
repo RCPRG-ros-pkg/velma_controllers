@@ -2,7 +2,7 @@ initial_behavior: idle
 switchable_components: [CImp, JntLimit, PoseIntRight, PoseIntLeft, JntImp, TrajectoryGeneratorJoint, RightForceControl, LeftForceControl, RightForceTransformation, LeftForceTransformation, lli_hi_tx]
 behaviors: 
   - name: idle
-    running: []
+    running: [lli_hi_tx]
   - name: CartImp
     running: [CImp, JntLimit, PoseIntLeft, PoseIntRight, lli_hi_tx]
   - name: JntImp
