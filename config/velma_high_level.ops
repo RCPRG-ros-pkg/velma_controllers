@@ -826,11 +826,36 @@ bm.rosparam.getAll();
 loadService("bm","rosservice");
 bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
 
+#setMasterSlaveActivity("bm", "scheme");
 addPeer("bm", "scheme");
 bm.configure();
 
-setMasterSlaveActivity("lli_hi_rx", "bm");
+addPeer("lli_hi_rx", "bm");
+#setMasterSlaveActivity("lli_hi_rx", "bm");
 connect("bm.cmd_sc_OUTPORT","lli_hi_tx.cmd_safety_controller_cmd_INPORT", ConnPolicy())
+
+connect("lli_hi_rx.status_sc_OUTPORT","bm.port_status_sc_INPORT", ConnPolicy())
+
+connect("lli_hi_rx.status_test_OUTPORT","lli_hi_tx.cmd_test_INPORT", ConnPolicy())
+
+connect("lli_hi_rx.status_test_OUTPORT","bm.status_test_INPORT", ConnPolicy())
+
+
+loadComponent("bi","BehaviorInterface");
+setActivity("bi", 0.01, 1, ORO_SCHED_RT);
+bi.loadService("rosparam");
+bi.rosparam.getAll();
+
+loadService("bi","rosservice");
+bi.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
+
+connect("bi.behavior_OUTPORT","bm.behavior_INPORT", ConnPolicy())
+
+bi.configure();
+
+
+
+
 
 //------------------------------------------------------------------------------
 
@@ -891,6 +916,8 @@ lli_hi_tx.start();
 scheme.start();
 
 bm.start();
+
+bi.start();
 
 // dot graph generation
 //dot.dot_file="/home/dseredyn/ws_sim_full/oro.dot"

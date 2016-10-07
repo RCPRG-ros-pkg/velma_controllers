@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <param name="bm/behaviors" command="cat $(find velma_controller)/config/behaviors.yaml"/>
+    <param name="bi/behaviors" command="cat $(find velma_controller)/config/behaviors.yaml"/>
 
     <rosparam>
       RightForceTransformation:
