@@ -48,6 +48,34 @@ cpRx.name_id   = "/lli_status";     # the connection id
 
 loadComponent("lli_hi_rx","VelmaLLIHiRx")
 setActivity("lli_hi_rx", 0, 10, ORO_SCHED_RT);
+
+
+//------------------------------------------------------------------------------
+//-- Behavior manager
+//------------------------------------------------------------------------------
+
+loadComponent("bm","BehaviorManager");
+bm.loadService("rosparam");
+bm.rosparam.getAll();
+
+#loadService("bm","rosservice");
+#bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
+
+//------------------------------------------------------------------------------
+//-- Controller manager
+//------------------------------------------------------------------------------
+loadComponent("scheme", "conman::Scheme");
+scheme.loadService("conman_ros");
+scheme.configure();
+
+# add slave tasks to lli_hi_rx
+addPeer("lli_hi_rx", "bm");
+addPeer("lli_hi_rx", "scheme");
+
+# set slave tasks execution order (before configure)
+lli_hi_rx.pushBackPeerExecution("bm");
+lli_hi_rx.pushBackPeerExecution("scheme");
+
 lli_hi_rx.configure();
 stream("lli_hi_rx.status_INPORT", cpRx);
 
@@ -165,8 +193,8 @@ setActivityOnCPU("TorquePubLeft", 0.01, 1, ORO_SCHED_RT, 0)
 
 ## load gravity component
 
-loadComponent("VG", "VelmaGrav");
-VG.configure();
+#loadComponent("VG", "VelmaGrav");
+#VG.configure();
 
 ## load cartesian trajectory action
 loadComponent("CartTrjRight", "CartesianTrajectoryAction");
@@ -283,8 +311,8 @@ connect("lli_hi_rx.status_lArm_gt_OUTPORT", "TorquePubLeft.InGravityTorque", Con
 
 ## gravity component
 
-connect("lli_hi_rx.status_lArm_gt_OUTPORT", "VG.GravTrqLeft", ConnPolicy());
-connect("lli_hi_rx.status_rArm_gt_OUTPORT", "VG.GravTrqRight", ConnPolicy());
+#connect("lli_hi_rx.status_lArm_gt_OUTPORT", "VG.GravTrqLeft", ConnPolicy());
+#connect("lli_hi_rx.status_rArm_gt_OUTPORT", "VG.GravTrqRight", ConnPolicy());
 
 ## cartesian trajectory action
 
@@ -320,49 +348,6 @@ leftHandMoveAction.actionlib.connect("/left_hand/move_hand");
 
 
 
-
-
-
-
-//------------------------------------------------------------------------------
-//-- Behavior manager
-//------------------------------------------------------------------------------
-
-loadComponent("bm","BehaviorManager");
-setMasterSlaveActivity("lli_hi_rx", "bm");
-#setActivity("bm", 0, 1, ORO_SCHED_RT);
-bm.loadService("rosparam");
-bm.rosparam.getAll();
-
-#loadService("bm","rosservice");
-#bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
-
-
-
-
-
-
-
-
-
-
-
-
-
-//------------------------------------------------------------------------------
-//-- Controller manager
-//------------------------------------------------------------------------------
-loadComponent("scheme", "conman::Scheme");
-
-setMasterSlaveActivity("lli_hi_rx", "scheme");
-#setMasterSlaveActivity("bm", "scheme");
-#setActivityOnCPU("scheme", 0, 5, ORO_SCHED_RT, 3);
-#TODO: uncomment
-#if (useSimulationTime()) then { scheme.loadService("sim_clock_activity") }
-
-scheme.loadService("conman_ros");
-
-scheme.configure();
 
 
 //------------------------------------------------------------------------------
@@ -607,7 +592,7 @@ connect("JntLimit.JointTorqueCommand_OUTPORT", "CImp.NullSpaceTorqueCommand_INPO
 
 
 //connect("TJ.NullSpaceTorqueCommand_OUTPORT", "JntLimit.NullSpaceTorqueCommand_INPORT", ConnPolicy());
-connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand_INPORT", ConnPolicy());
+#connect("VG.GravTrq", "JntLimit.NullSpaceTorqueCommand_INPORT", ConnPolicy());
 
 // head look-at
 
@@ -663,6 +648,20 @@ ImpedanceIntRight.configure()
 ImpedanceIntLeft.configure()
 JntLimit.configure();
 
+var bool triggerOnStart = false
+set CImp.TriggerOnStart = triggerOnStart
+set JntLimit.TriggerOnStart = triggerOnStart
+set PoseIntRight.TriggerOnStart = triggerOnStart
+set PoseIntLeft.TriggerOnStart = triggerOnStart
+set JntImp.TriggerOnStart = triggerOnStart
+set TrajectoryGeneratorJoint.TriggerOnStart = triggerOnStart
+set RightForceControl.TriggerOnStart = triggerOnStart
+set LeftForceControl.TriggerOnStart = triggerOnStart
+set RightForceTransformation.TriggerOnStart = triggerOnStart
+set LeftForceTransformation.TriggerOnStart = triggerOnStart
+set lli_hi_tx.TriggerOnStart = triggerOnStart
+set Mass.TriggerOnStart = triggerOnStart
+
 addPeer("scheme", "TorsoPanTransmision")
 addPeer("scheme", "TorsoPanTransmisionInv")
 addPeer("scheme", "HeadPanVelocityLimiter")
@@ -688,7 +687,7 @@ addPeer("scheme", "PoseIntRight");
 addPeer("scheme", "PoseIntLeft");
 addPeer("scheme", "ImpedanceIntRight");
 addPeer("scheme", "ImpedanceIntLeft");
-addPeer("scheme", "VG");
+#addPeer("scheme", "VG");
 addPeer("scheme", "ToolIntRight");
 addPeer("scheme", "ToolIntLeft");
 addPeer("scheme", "JntImp");
@@ -730,7 +729,7 @@ scheme.addBlock("ImpedanceIntRight");
 scheme.addBlock("ImpedanceIntLeft");
 scheme.latchConnections("CImp", "PoseIntRight", true);
 scheme.latchConnections("CImp", "PoseIntLeft", true);
-scheme.addBlock("VG");
+#scheme.addBlock("VG");
 scheme.addBlock("ToolIntRight");
 scheme.addBlock("ToolIntLeft");
 scheme.addBlock("JntImp");
@@ -943,7 +942,7 @@ JvcAll.start();
 Ts.start();
 Dwr.start();
 Dwl.start();
-Mass.start();
+//Mass.start();
 //CImp.start();
 JntPub.start();
 CartTrjRight.start();
