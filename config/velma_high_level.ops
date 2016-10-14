@@ -47,7 +47,7 @@ cpRx.transport = 2;                 # the MQueue protocol id
 cpRx.name_id   = "/lli_status";     # the connection id
 
 loadComponent("lli_hi_rx","VelmaLLIHiRx")
-setActivity("lli_hi_rx", 0, 1, ORO_SCHED_RT);
+setActivity("lli_hi_rx", 0, 10, ORO_SCHED_RT);
 lli_hi_rx.configure();
 stream("lli_hi_rx.status_INPORT", cpRx);
 
@@ -70,14 +70,16 @@ lli_hi_tx.configure();
 ## Load a BarrettHand move action
 
 loadComponent("rightHandMoveAction","BarrettHandMoveAction")
-setActivityOnCPU("rightHandMoveAction", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { rightHandMoveAction.loadService("sim_clock_activity") }
+setActivityOnCPU("rightHandMoveAction", 0.01, 0, ORO_SCHED_OTHER, 0);
+#TODO: uncomment
+#if (useSimulationTime()) then { rightHandMoveAction.loadService("sim_clock_activity") }
 rightHandMoveAction.loadService("rosparam");
 rightHandMoveAction.rosparam.getAll();
 
 loadComponent("leftHandMoveAction","BarrettHandMoveAction")
-setActivityOnCPU("leftHandMoveAction", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { leftHandMoveAction.loadService("sim_clock_activity") }
+setActivityOnCPU("leftHandMoveAction", 0.01, 0, ORO_SCHED_OTHER, 0);
+#TODO: uncomment
+#if (useSimulationTime()) then { leftHandMoveAction.loadService("sim_clock_activity") }
 leftHandMoveAction.loadService("rosparam");
 leftHandMoveAction.rosparam.getAll();
 
@@ -134,11 +136,13 @@ Ts.rosparam.getAll();
 ## load wrench decimators
 loadComponent("Dwr", "DecimatorWrench");
 setActivityOnCPU("Dwr", 0.01, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { Dwr.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { Dwr.loadService("sim_clock_activity") }
 
 loadComponent("Dwl", "DecimatorWrench");
 setActivityOnCPU("Dwl", 0.01, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { Dwl.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { Dwl.loadService("sim_clock_activity") }
 
 ## load mass matrix component
 
@@ -151,11 +155,13 @@ Mass.configure();
 
 loadComponent("TorquePubRight", "TorquePublisher")
 setActivityOnCPU("TorquePubRight", 0.01, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { TorquePubRight.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { TorquePubRight.loadService("sim_clock_activity") }
 
 loadComponent("TorquePubLeft", "TorquePublisher")
 setActivityOnCPU("TorquePubLeft", 0.01, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { TorquePubLeft.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { TorquePubLeft.loadService("sim_clock_activity") }
 
 ## load gravity component
 
@@ -165,17 +171,20 @@ VG.configure();
 ## load cartesian trajectory action
 loadComponent("CartTrjRight", "CartesianTrajectoryAction");
 setActivityOnCPU("CartTrjRight", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartTrjRight.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartTrjRight.loadService("sim_clock_activity") }
 
 loadComponent("CartTrjLeft", "CartesianTrajectoryAction");
 setActivityOnCPU("CartTrjLeft", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartTrjLeft.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartTrjLeft.loadService("sim_clock_activity") }
 
 ## load camera trigger
 
 loadComponent("TGR", "TriggerGenerator");
 setActivityOnCPU("TGR", 0.1, 2, ORO_SCHED_RT, 1);
-if (useSimulationTime()) then { TGR.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { TGR.loadService("sim_clock_activity") }
 TGR.configure();
 
 ##
@@ -308,21 +317,52 @@ leftHandMoveAction.configure();
 leftHandMoveAction.loadService("actionlib");
 leftHandMoveAction.actionlib.connect("/left_hand/move_hand");
 
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------
+//-- Behavior manager
+//------------------------------------------------------------------------------
+
+loadComponent("bm","BehaviorManager");
+setMasterSlaveActivity("lli_hi_rx", "bm");
+#setActivity("bm", 0, 1, ORO_SCHED_RT);
+bm.loadService("rosparam");
+bm.rosparam.getAll();
+
+#loadService("bm","rosservice");
+#bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
+
+
+
+
+
+
+
+
+
+
+
+
+
 //------------------------------------------------------------------------------
 //-- Controller manager
 //------------------------------------------------------------------------------
 loadComponent("scheme", "conman::Scheme");
 
-setActivityOnCPU("scheme", 0, 5, ORO_SCHED_RT, 3);
-if (useSimulationTime()) then { scheme.loadService("sim_clock_activity") }
+setMasterSlaveActivity("lli_hi_rx", "scheme");
+#setMasterSlaveActivity("bm", "scheme");
+#setActivityOnCPU("scheme", 0, 5, ORO_SCHED_RT, 3);
+#TODO: uncomment
+#if (useSimulationTime()) then { scheme.loadService("sim_clock_activity") }
 
 scheme.loadService("conman_ros");
 
 scheme.configure();
-
-#setMasterSlaveActivity("lli_hi_rx", "scheme");
-
-
 
 
 //------------------------------------------------------------------------------
@@ -331,7 +371,8 @@ scheme.configure();
 
 loadComponent("TJ", "TorsoTeleopJoy")
 setActivityOnCPU("TJ", 0.01, 6, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { TJ.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { TJ.loadService("sim_clock_activity") }
 TJ.loadService("rosparam");
 TJ.rosparam.getAll();
 TJ.configure();
@@ -443,7 +484,8 @@ connect("ToolIntLeft.CartesianPositionCommand", "CImp.ToolPositionCommand1_INPOR
 
 loadComponent("TfPub", "TfPublisher")
 setActivityOnCPU("TfPub", 0.01, 1, ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { TfPub.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { TfPub.loadService("sim_clock_activity") }
 TfPub.loadService("rosparam");
 TfPub.rosparam.getAll();
 TfPub.configure();
@@ -709,7 +751,8 @@ scheme.addBlock("lli_hi_tx");
 
 loadComponent("JntPub", "JointStatePublisher");
 setActivityOnCPU("JntPub", 0.002, 2, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { JntPub.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { JntPub.loadService("sim_clock_activity") }
 JntPub.loadService("rosparam");
 JntPub.rosparam.getAll();
 
@@ -751,7 +794,8 @@ CartTrjLeft.actionlib.connect("/left_arm/cartesian_trajectory")
 
 loadComponent("SplineTrajectoryActionJoint", "InternalSpaceSplineTrajectoryAction")
 setActivityOnCPU("SplineTrajectoryActionJoint", 0.01 ,2 ,ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { SplineTrajectoryActionJoint.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { SplineTrajectoryActionJoint.loadService("sim_clock_activity") }
 SplineTrajectoryActionJoint.loadService("rosparam");
 SplineTrajectoryActionJoint.rosparam.getAll();
 SplineTrajectoryActionJoint.loadService("actionlib")
@@ -763,7 +807,8 @@ SplineTrajectoryActionJoint.configure()
 
 loadComponent("HeadSplineTrajectoryActionJoint", "InternalSpaceSplineTrajectoryAction")
 setActivityOnCPU("HeadSplineTrajectoryActionJoint", 0.01 ,2 ,ORO_SCHED_RT, 0)
-if (useSimulationTime()) then { HeadSplineTrajectoryActionJoint.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { HeadSplineTrajectoryActionJoint.loadService("sim_clock_activity") }
 HeadSplineTrajectoryActionJoint.loadService("rosparam");
 HeadSplineTrajectoryActionJoint.rosparam.getAll();
 HeadSplineTrajectoryActionJoint.loadService("actionlib")
@@ -777,7 +822,8 @@ HeadSplineTrajectoryActionJoint.configure()
 
 loadComponent("CartToolRight", "CartesianTrajectoryAction");
 setActivityOnCPU("CartToolRight", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartToolRight.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartToolRight.loadService("sim_clock_activity") }
 CartToolRight.configure()
 CartToolRight.loadService("actionlib")
 CartToolRight.actionlib.connect("/right_arm/tool_trajectory")
@@ -785,7 +831,8 @@ connect("CartToolRight.CartesianTrajectoryCommand","ToolIntRight.CartesianTrajec
 
 loadComponent("CartToolLeft", "CartesianTrajectoryAction");
 setActivityOnCPU("CartToolLeft", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartToolLeft.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartToolLeft.loadService("sim_clock_activity") }
 CartToolLeft.configure()
 CartToolLeft.loadService("actionlib")
 CartToolLeft.actionlib.connect("/left_arm/tool_trajectory")
@@ -795,7 +842,8 @@ connect("CartToolLeft.CartesianTrajectoryCommand","ToolIntLeft.CartesianTrajecto
 
 loadComponent("CartImpRight", "CartesianImpedanceAction");
 setActivityOnCPU("CartImpRight", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartImpRight.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartImpRight.loadService("sim_clock_activity") }
 
 connect("CartImpRight.CartesianImpedanceTrajectoryCommand_OUTPORT", "ImpedanceIntRight.CartesianImpedanceTrajectoryCommand", ConnPolicy());
 
@@ -807,7 +855,8 @@ CartImpRight.actionlib.connect("/right_arm/cartesian_impedance")
 
 loadComponent("CartImpLeft", "CartesianImpedanceAction");
 setActivityOnCPU("CartImpLeft", 0.01, 1, ORO_SCHED_RT, 0);
-if (useSimulationTime()) then { CartImpLeft.loadService("sim_clock_activity") }
+#TODO: uncomment
+#if (useSimulationTime()) then { CartImpLeft.loadService("sim_clock_activity") }
 
 connect("CartImpLeft.CartesianImpedanceTrajectoryCommand_OUTPORT", "ImpedanceIntLeft.CartesianImpedanceTrajectoryCommand", ConnPolicy());
 
@@ -818,20 +867,26 @@ CartImpLeft.loadService("actionlib")
 CartImpLeft.actionlib.connect("/left_arm/cartesian_impedance")
 
 
-loadComponent("bm","BehaviorManager");
-setActivity("bm", 0, 1, ORO_SCHED_RT);
-bm.loadService("rosparam");
-bm.rosparam.getAll();
 
-loadService("bm","rosservice");
-bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
 
-#setMasterSlaveActivity("bm", "scheme");
+
+
+//------------------------------------------------------------------------------
+//-- Behavior manager
+//------------------------------------------------------------------------------
+
+#loadComponent("bm","BehaviorManager");
+#setMasterSlaveActivity("lli_hi_rx", "bm");
+##setActivity("bm", 0, 1, ORO_SCHED_RT);
+#bm.loadService("rosparam");
+#bm.rosparam.getAll();
+
+##loadService("bm","rosservice");
+##bm.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behavior_manager_msgs/SwitchBehavior")
+
 addPeer("bm", "scheme");
 bm.configure();
 
-addPeer("lli_hi_rx", "bm");
-#setMasterSlaveActivity("lli_hi_rx", "bm");
 connect("bm.cmd_sc_OUTPORT","lli_hi_tx.cmd_safety_controller_cmd_INPORT", ConnPolicy())
 
 connect("lli_hi_rx.status_sc_OUTPORT","bm.port_status_sc_INPORT", ConnPolicy())
@@ -852,6 +907,11 @@ bi.rosservice.connect("behavior.switchBehavior", "/velma/switchBehavior", "behav
 connect("bi.behavior_OUTPORT","bm.behavior_INPORT", ConnPolicy())
 
 bi.configure();
+
+
+
+
+
 
 
 
