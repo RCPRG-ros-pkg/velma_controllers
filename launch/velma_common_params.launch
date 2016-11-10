@@ -89,24 +89,6 @@
         gear: 100.0
         encoder_res: 8000.0
         motor_constant: 0.0
-      HeadPosAggregate:
-        number_of_ports: 2
-      HeadVelAggregate:
-        number_of_ports: 2
-      HeadPosSplit:
-        number_of_ports: 2
-      TorsoTrqSplit:
-        number_of_ports: 1
-      TorsoPosAggregate:
-        number_of_ports: 1
-      TorsoVelAggregate:
-        number_of_ports: 1
-      Ts:
-        outputs: [1, 7, 7]
-      TrajectoryGeneratorJoint:
-        number_of_joints: 15
-      HeadTrajectoryGeneratorJoint:
-        number_of_joints: 2
       SplineTrajectoryActionJoint:
         joint_names: [torso_0_joint, right_arm_0_joint, right_arm_1_joint, right_arm_2_joint, right_arm_3_joint, right_arm_4_joint, right_arm_5_joint, right_arm_6_joint, left_arm_0_joint, left_arm_1_joint, left_arm_2_joint, left_arm_3_joint, left_arm_4_joint, left_arm_5_joint, left_arm_6_joint]
         lower_limits: [-2.0, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96, -2.96, -2.09, -2.96, -2.09, -2.96, -2.09, -2.96]
@@ -116,7 +98,6 @@
         lower_limits: [-1.57, -1]
         upper_limits: [1.57, 1]
       JntImp:
-        number_of_joints: 15
         initial_stiffness: [1200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.01, 200.0, 200.01]
       JntLimit:
         upper_limit: [1.56, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96, 2.96, 2.09, 2.96, 2.09, 2.96, 2.09, 2.96]

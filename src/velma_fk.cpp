@@ -6,28 +6,44 @@
  *      Author: Konrad Banachowicz
  */
 
-
-
 #include "velma_fk.h"
 
 #include <string>
 
 #include "rtt/Component.hpp"
 
-VelmaFK::VelmaFK(const std::string& name) : RTT::TaskContext(name, PreOperational) {
-  this->ports()->addPort("JointPosition_INPORT", port_joint_position_in_);
-  this->ports()->addPort("LeftTool_INPORT", port_left_tool_position_in_);
-  this->ports()->addPort("RightTool_INPORT", port_right_tool_position_in_);
-  this->ports()->addPort("LeftPosition_OUTPORT", port_left_position_out_);
-  this->ports()->addPort("RightPosition_OUTPORT", port_right_position_out_);
-  this->ports()->addPort("LeftWrist_OUTPORT", port_left_wrist_out_);
-  this->ports()->addPort("RightWrist_OUTPORT", port_right_wrist_out_);
+VelmaFK::VelmaFK(const std::string& name) :
+    RTT::TaskContext(name, PreOperational),
+    port_joint_position_in_("JointPosition_INPORT"),
+    port_left_tool_position_in_("LeftTool_INPORT"),
+    port_right_tool_position_in_("RightTool_INPORT"),
+    port_left_position_out_("LeftPosition_OUTPORT", false),
+    port_right_position_out_("RightPosition_OUTPORT", false),
+    port_left_wrist_out_("LeftWrist_OUTPORT", false),
+    port_right_wrist_out_("RightWrist_OUTPORT", false) {
+
+  this->ports()->addPort(port_joint_position_in_);
+  this->ports()->addPort(port_left_tool_position_in_);
+  this->ports()->addPort(port_right_tool_position_in_);
+  this->ports()->addPort(port_left_position_out_);
+  this->ports()->addPort(port_right_position_out_);
+  this->ports()->addPort(port_left_wrist_out_);
+  this->ports()->addPort(port_right_wrist_out_);
+
+  geometry_msgs::Pose left_position_out, right_position_out, left_wrist_out, right_wrist_out;
+
+  port_left_position_out_.setDataSample(left_position_out);
+  port_right_position_out_.setDataSample(right_position_out);
+  port_left_wrist_out_.setDataSample(left_wrist_out);
+  port_right_wrist_out_.setDataSample(right_wrist_out);
 }
 
 VelmaFK::~VelmaFK() {
 }
 
 bool VelmaFK::configureHook() {
+  RTT::Logger::In in("VelmaFK::configureHook");
+
   robot_ = this->getProvider<Robot>("robot");
   if (!robot_) {
     RTT::log(RTT::Error) << "Unable to load RobotService"
@@ -35,14 +51,16 @@ bool VelmaFK::configureHook() {
     return false;
   }
 
-  empty_tools_.resize(2);
   empty_tools_[0].setZero();
   empty_tools_[0](3) = 1.0;     // w component of orientation quaternion
   empty_tools_[1].setZero();
   empty_tools_[1](3) = 1.0;     // w component of orientation quaternion
 
-  tools_.resize(2);
-  joint_position_in_.resize(16);
+  tools_[0].setZero();
+  tools_[0](3) = 1.0;           // w component of orientation quaternion
+  tools_[1].setZero();
+  tools_[1](3) = 1.0;           // w component of orientation quaternion
+
   return true;
 }
 
@@ -50,7 +68,13 @@ void VelmaFK::updateHook() {
   geometry_msgs::Pose left_tool_position_in, right_tool_position_in, left_position_out, right_position_out, left_wrist_out, right_wrist_out;
   Eigen::Affine3d r[2];
 
-  port_joint_position_in_.read(joint_position_in_);
+  if (port_joint_position_in_.read(joint_position_in_) != RTT::NewData) {
+    RTT::Logger::In in("VelmaFK::updateHook");
+    error();
+    RTT::log(RTT::Error) << "Unable to read port "
+                         << port_joint_position_in_.getName() << RTT::endlog();
+    return;
+  }
 
   if (port_left_tool_position_in_.read(left_tool_position_in) == RTT::NewData) {
     tools_[1](0) = left_tool_position_in.position.x;

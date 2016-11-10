@@ -29,23 +29,26 @@ class VelmaFK: public RTT::TaskContext {
   bool configureHook();
   void updateHook();
  private:
+
+  typedef Eigen::Matrix<double, 15, 1> Joints;
+
   typedef Eigen::Matrix<double, 7, 1> Tool;
-  typedef controller_common::Robot Robot;
+  typedef controller_common::Robot<15, 2> Robot;
 
   RTT::OutputPort<geometry_msgs::Pose> port_left_position_out_;
   RTT::OutputPort<geometry_msgs::Pose> port_right_position_out_;
   RTT::OutputPort<geometry_msgs::Pose> port_left_wrist_out_;
   RTT::OutputPort<geometry_msgs::Pose> port_right_wrist_out_;
 
-  RTT::InputPort<Eigen::VectorXd > port_joint_position_in_;
+  RTT::InputPort<Joints > port_joint_position_in_;
   RTT::InputPort<geometry_msgs::Pose> port_left_tool_position_in_;
   RTT::InputPort<geometry_msgs::Pose> port_right_tool_position_in_;
 
 
-  Eigen::VectorXd joint_position_in_;
+  Joints joint_position_in_;
   boost::shared_ptr<Robot> robot_;
-  std::vector<Tool> tools_;
-  std::vector<Tool> empty_tools_;
+  boost::array<Tool, 2> tools_;
+  boost::array<Tool, 2> empty_tools_;
 };
 
 #endif  // VELMA_FK_H_

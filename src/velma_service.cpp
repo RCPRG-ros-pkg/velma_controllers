@@ -12,9 +12,9 @@
 
 #include "params.inc"
 
-class VelmaService : public controller_common::RobotService {
+class VelmaService : public controller_common::RobotService<15,2> {
  public:
-  explicit VelmaService(RTT::TaskContext* owner) : controller_common::RobotService(owner) {
+  explicit VelmaService(RTT::TaskContext* owner) : controller_common::RobotService<15,2>(owner) {
   }
 
   virtual ~VelmaService() {

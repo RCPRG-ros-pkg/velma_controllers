@@ -15,10 +15,16 @@
 class VelocityLimiter: public RTT::TaskContext {
  public:
   explicit VelocityLimiter(const std::string& name):
-    RTT::TaskContext(name), position_out_(0), max_vel_(0) {
-    this->ports()->addPort("PositionMsr", port_position_msr_);
-    this->ports()->addPort("PositionIn", port_position_in_);
-    this->ports()->addPort("PositionOut", port_position_out_);
+    RTT::TaskContext(name),
+    position_out_(0),
+    max_vel_(0),
+    port_position_msr_in_("PositionMsr_INPORT"),
+    port_position_in_("Position_INPORT"),
+    port_position_out_("Position_OUTPORT", false) {
+
+    this->ports()->addPort(port_position_msr_in_);
+    this->ports()->addPort(port_position_in_);
+    this->ports()->addPort(port_position_out_);
     this->addProperty("max_vel", max_vel_);
   }
 
@@ -27,7 +33,7 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
   bool startHook() {
-    if (port_position_msr_.read(position_out_) == RTT::NoData) {
+    if (port_position_msr_in_.read(position_out_) == RTT::NoData) {
       return false;
     }
     return true;
@@ -49,7 +55,7 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
  private:
-  RTT::InputPort<double> port_position_msr_;
+  RTT::InputPort<double> port_position_msr_in_;
   RTT::InputPort<double> port_position_in_;
   RTT::OutputPort<double> port_position_out_;
 
