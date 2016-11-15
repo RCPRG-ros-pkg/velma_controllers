@@ -858,7 +858,8 @@ CartImpActionLeft.actionlib.connect("/left_arm/cartesian_impedance")
 addPeer("bm", "scheme");
 bm.configure();
 
-connect("bm.cmd_sc_OUTPORT","lli_hi_tx.cmd_safety_controller_cmd_INPORT", ConnPolicy())
+connect("bm.cmd_sc_cmd_OUTPORT","lli_hi_tx.cmd_safety_controller_cmd_INPORT", ConnPolicy())
+connect("bm.cmd_sc_valid_OUTPORT","lli_hi_tx.cmd_safety_controller_valid_INPORT", ConnPolicy())
 
 connect("lli_hi_rx.status_sc_OUTPORT","bm.port_status_sc_INPORT", ConnPolicy())
 
