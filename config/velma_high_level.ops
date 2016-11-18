@@ -39,12 +39,10 @@ var bool disableROS = true;
 #
 # the low-level interface
 #
-var ConnPolicy cpRx;
-cpRx.transport = 2;                 # the MQueue protocol id
-cpRx.name_id   = "/lli_status";     # the connection id
-
 loadComponent("lli_hi_rx","VelmaLLIHiRx")
 setActivity("lli_hi_rx", 0, 10, ORO_SCHED_RT);
+lli_hi_rx.loadService("rosparam");
+lli_hi_rx.rosparam.getAll();
 
 
 //------------------------------------------------------------------------------
@@ -71,11 +69,12 @@ lli_hi_rx.pushBackPeerExecution("bm");
 lli_hi_rx.pushBackPeerExecution("scheme");
 
 lli_hi_rx.configure();
-stream("lli_hi_rx.status_INPORT", cpRx);
 
 
 loadComponent("lli_hi_tx","VelmaLLIHiTx")
 setActivity("lli_hi_tx", 0, 1, ORO_SCHED_RT);
+lli_hi_tx.loadService("rosparam");
+lli_hi_tx.rosparam.getAll();
 lli_hi_tx.configure();
 
 
