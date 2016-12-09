@@ -17,10 +17,10 @@ VelmaFK::VelmaFK(const std::string& name) :
     port_joint_position_in_("JointPosition_INPORT"),
     port_left_tool_position_in_("LeftTool_INPORT"),
     port_right_tool_position_in_("RightTool_INPORT"),
-    port_left_position_out_("LeftPosition_OUTPORT", false),
-    port_right_position_out_("RightPosition_OUTPORT", false),
-    port_left_wrist_out_("LeftWrist_OUTPORT", false),
-    port_right_wrist_out_("RightWrist_OUTPORT", false) {
+    port_left_position_out_("LeftPosition_OUTPORT", true),
+    port_right_position_out_("RightPosition_OUTPORT", true),
+    port_left_wrist_out_("LeftWrist_OUTPORT", true),
+    port_right_wrist_out_("RightWrist_OUTPORT", true) {
 
   this->ports()->addPort(port_joint_position_in_);
   this->ports()->addPort(port_left_tool_position_in_);
@@ -70,7 +70,7 @@ void VelmaFK::updateHook() {
 
   if (port_joint_position_in_.read(joint_position_in_) != RTT::NewData) {
     RTT::Logger::In in("VelmaFK::updateHook");
-    error();
+//    error();
     RTT::log(RTT::Error) << "Unable to read port "
                          << port_joint_position_in_.getName() << RTT::endlog();
     return;
