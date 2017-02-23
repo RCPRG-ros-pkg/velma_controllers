@@ -33,14 +33,20 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
   bool startHook() {
-    if (port_position_msr_in_.read(position_out_) == RTT::NoData) {
-      return false;
-    }
+    first_step_ = true;
     return true;
   }
 
   void updateHook() {
     double position_cmd;
+
+    if (first_step_) {
+      if (port_position_msr_in_.read(position_out_) != RTT::NewData) {
+        error();
+        return;
+      }
+      first_step_ = false;
+    }
 
     if (port_position_in_.read(position_cmd) == RTT::NewData) {
       if (fabs(position_out_ - position_cmd) < max_vel_) {
@@ -61,6 +67,8 @@ class VelocityLimiter: public RTT::TaskContext {
 
   double position_out_;
   double max_vel_;
+
+  bool first_step_;
 };
 
 ORO_CREATE_COMPONENT(VelocityLimiter)
