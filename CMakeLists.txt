@@ -30,8 +30,6 @@ ADD_DEFINITIONS(-DEIGEN_RUNTIME_NO_MALLOC)
 ### Orocos Targets ###
 
 orocos_component( velma_components 
-  src/components/joint_generator2.cpp
-  src/components/joint_generator15.cpp
   src/components/joint_impedance.cpp
   src/components/vector_concate1_7_7_0.cpp
   src/components/vector_concate15_2_8_8.cpp
@@ -48,8 +46,6 @@ orocos_component( velma_components
   src/components/double_split1.cpp
   src/components/double_split2.cpp
   src/components/joint_state_publisher33.cpp
-  src/components/joint_trajectory_action15.cpp
-  src/components/joint_trajectory_action2.cpp
   src/components/library.cpp
 )
 target_link_libraries(velma_components ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})
