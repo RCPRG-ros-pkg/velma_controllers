@@ -42,6 +42,8 @@ class VelocityLimiter: public RTT::TaskContext {
 
     if (first_step_) {
       if (port_position_msr_in_.read(position_out_) != RTT::NewData) {
+        RTT::Logger::In in("VelocityLimiter::updateHook");
+        RTT::Logger::log() << RTT::Logger::Error << "could not read data on port " << port_position_msr_in_.getName() << RTT::Logger::endl;
         error();
         return;
       }
