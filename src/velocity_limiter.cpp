@@ -8,11 +8,15 @@
 
 #include <string>
 
+#include "Eigen/Dense"
+
 #include "rtt/TaskContext.hpp"
 #include "rtt/Port.hpp"
 #include "rtt/Component.hpp"
 
 class VelocityLimiter: public RTT::TaskContext {
+  typedef Eigen::Matrix<double, 1, 1 > Joints;
+
  public:
   explicit VelocityLimiter(const std::string& name):
     RTT::TaskContext(name),
@@ -40,13 +44,15 @@ class VelocityLimiter: public RTT::TaskContext {
   void updateHook() {
     double position_cmd;
 
+    Joints position;
     if (first_step_) {
-      if (port_position_msr_in_.read(position_out_) != RTT::NewData) {
+      if (port_position_msr_in_.read(position) != RTT::NewData) {
         RTT::Logger::In in("VelocityLimiter::updateHook");
         RTT::Logger::log() << RTT::Logger::Error << "could not read data on port " << port_position_msr_in_.getName() << RTT::Logger::endl;
         error();
         return;
       }
+      position_out_ = position(0);
       first_step_ = false;
     }
 
@@ -63,7 +69,8 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
  private:
-  RTT::InputPort<double> port_position_msr_in_;
+
+  RTT::InputPort<Joints> port_position_msr_in_;
   RTT::InputPort<double> port_position_in_;
   RTT::OutputPort<double> port_position_out_;
 

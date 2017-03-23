@@ -32,6 +32,7 @@ ADD_DEFINITIONS(-DEIGEN_RUNTIME_NO_MALLOC)
 orocos_component( velma_components 
   src/components/joint_impedance.cpp
   src/components/vector_concate1_7_7_0.cpp
+  src/components/vector_concate1_1_0_0.cpp
   src/components/vector_concate15_2_8_8.cpp
   src/components/vector_split1_7_7_0.cpp
   src/components/vector_split15_2_8_8.cpp
