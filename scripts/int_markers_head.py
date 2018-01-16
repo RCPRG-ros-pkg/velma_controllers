@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     server.applyChanges();
 
-    action_trajectory_client = actionlib.SimpleActionClient("/head_spline_trajectory_action_joint", control_msgs.msg.FollowJointTrajectoryAction)
+    action_trajectory_client = actionlib.SimpleActionClient("/velma_task_cs_ros_interface/head_spline_trajectory_action_joint", control_msgs.msg.FollowJointTrajectoryAction)
     action_trajectory_client.wait_for_server()
 
     rospy.spin()

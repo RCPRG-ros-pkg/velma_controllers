@@ -51,7 +51,7 @@ class Test:
         self.left_pub = rospy.Publisher("/left_arm/trajectory", CartesianTrajectory)
         self.listener = tf.TransformListener();
         
-        self.pose_client = actionlib.SimpleActionClient('/right_arm/cartesian_trajectory', CartesianTrajectoryAction)
+        self.pose_client = actionlib.SimpleActionClient('/velma_task_cs_ros_interface/right_arm/cartesian_trajectory', CartesianTrajectoryAction)
   	self.pose_client.wait_for_server()
         
         rospy.sleep(1.0)

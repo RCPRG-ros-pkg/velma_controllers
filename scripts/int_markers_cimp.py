@@ -69,10 +69,10 @@ class IntMarkersCimp:
         
         self.server.applyChanges();
 
-        self.action_trajectory_client = actionlib.SimpleActionClient("/" + self.prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
-        print "int_markers_cimp_[%s] script: waiting for /[%s]_arm/cartesian_trajectory action..."%(self.prefix, self.prefix)
+        self.action_trajectory_client = actionlib.SimpleActionClient("/velma_task_cs_ros_interface/" + self.prefix + "_arm/cartesian_trajectory", CartesianTrajectoryAction)
+        print "int_markers_cimp_[%s] script: waiting for /velma_task_cs_ros_interface/[%s]_arm/cartesian_trajectory action..."%(self.prefix, self.prefix)
         self.action_trajectory_client.wait_for_server()
-        print "int_markers_cimp_[%s] script: connected to action /[%s]_arm/cartesian_trajectory"%(self.prefix, self.prefix)
+        print "int_markers_cimp_[%s] script: connected to action /velma_task_cs_ros_interface/[%s]_arm/cartesian_trajectory"%(self.prefix, self.prefix)
 
     def getTransformations(self):
         pose = self.listener.lookupTransform('torso_base', self.prefix+'_arm_7_link', rospy.Time(0))
