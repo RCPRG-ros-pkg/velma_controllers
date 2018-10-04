@@ -12,6 +12,8 @@
 
 #include "rtt/Component.hpp"
 
+using namespace RTT;
+
 VelmaFK::VelmaFK(const std::string& name) :
     RTT::TaskContext(name, PreOperational),
     port_joint_position_in_("JointPosition_INPORT"),
@@ -46,8 +48,7 @@ bool VelmaFK::configureHook() {
 
   robot_ = this->getProvider<Robot>("robot");
   if (!robot_) {
-    RTT::log(RTT::Error) << "Unable to load RobotService"
-                         << RTT::endlog();
+    Logger::log() << Logger::Error << "Unable to load RobotService" << Logger::endl;
     return false;
   }
 
@@ -70,9 +71,8 @@ void VelmaFK::updateHook() {
 
   if (port_joint_position_in_.read(joint_position_in_) != RTT::NewData) {
     RTT::Logger::In in("VelmaFK::updateHook");
-//    error();
-    RTT::log(RTT::Error) << "Unable to read port "
-                         << port_joint_position_in_.getName() << RTT::endlog();
+    Logger::log() << Logger::Error << "Unable to read port "
+                         << port_joint_position_in_.getName() << Logger::endl;
     return;
   }
 
