@@ -24,11 +24,15 @@ class VelocityLimiter: public RTT::TaskContext {
     max_vel_(0),
     port_position_msr_in_("PositionMsr_INPORT"),
     port_position_in_("Position_INPORT"),
-    port_position_out_("Position_OUTPORT", false) {
+    port_velocity_in_("Velocity_INPORT"),
+    port_position_out_("Position_OUTPORT", false),
+    port_velocity_out_("Velocity_OUTPORT", false) {
 
     this->ports()->addPort(port_position_msr_in_);
     this->ports()->addPort(port_position_in_);
+    this->ports()->addPort(port_velocity_in_);
     this->ports()->addPort(port_position_out_);
+    this->ports()->addPort(port_velocity_out_);
     this->addProperty("max_vel", max_vel_);
   }
 
@@ -42,7 +46,7 @@ class VelocityLimiter: public RTT::TaskContext {
   }
 
   void updateHook() {
-    double position_cmd;
+    double position_cmd, velocity_cmd;
 
     Joints position;
     if (first_step_) {
@@ -66,15 +70,29 @@ class VelocityLimiter: public RTT::TaskContext {
       }
       port_position_out_.write(position_out_);
     }
+
+    if (port_velocity_in_.read(velocity_cmd) == RTT::NewData) {
+      if (velocity_cmd > max_vel_) {
+        velocity_out_ = max_vel_;
+      } else if (velocity_cmd < -max_vel_) {
+        velocity_out_ = -max_vel_;
+      } else {
+        velocity_out_ = velocity_cmd;
+      }
+      port_velocity_out_.write(velocity_out_);
+    }
   }
 
  private:
 
   RTT::InputPort<Joints> port_position_msr_in_;
   RTT::InputPort<double> port_position_in_;
+  RTT::InputPort<double> port_velocity_in_;
   RTT::OutputPort<double> port_position_out_;
+  RTT::OutputPort<double> port_velocity_out_;
 
   double position_out_;
+  double velocity_out_;
   double max_vel_;
 
   bool first_step_;
