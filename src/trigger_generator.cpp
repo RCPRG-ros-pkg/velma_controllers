@@ -16,6 +16,8 @@
 
 #include "std_msgs/Header.h"
 
+using RTT::Logger;
+
 class TriggerGenerator: public RTT::TaskContext {
  public:
   explicit TriggerGenerator(const std::string& name):
@@ -33,11 +35,26 @@ class TriggerGenerator: public RTT::TaskContext {
     port_trigger_stamp_out_.setDataSample(hdr_);
 
     this->properties()->addProperty("skip_cycles", skip_cycles_);
+    this->properties()->addProperty("bits", bits_);
   }
 
   bool configureHook() {
     if (skip_cycles_ == 0) {
+      Logger::log() << Logger::Error << "Wrong value of 'skip_cycles' parameter (not set?): should be > 0" << Logger::endl;
       return false;
+    }
+    if (bits_.size() == 0) {
+      Logger::log() << Logger::Error << "Wrong value of 'bits' parameter (not set)" << Logger::endl;
+      return false;
+    }
+    trigger_value_ = 0;
+    for (int i = 0; i < bits_.size(); ++i) {
+      if (bits_[i] < 0 || bits_[i] > 31) {
+        Logger::log() << Logger::Error << "Wrong value of 'bits[" << i << "]' parameter: '" <<
+                        bits_[i] << "', should be >=0 and < 32" << Logger::endl;
+        return false;
+      }
+      trigger_value_ |= (1<<bits_[i]);
     }
     return true;
   }
@@ -56,8 +73,11 @@ class TriggerGenerator: public RTT::TaskContext {
     if (trigger_ == false) {
       hdr_.stamp = rtt_rosclock::host_now();
       port_trigger_stamp_out_.write(hdr_);
+      port_trigger_out_.write( 0 );
     }
-    port_trigger_out_.write(uint32_t(trigger_));
+    else {
+      port_trigger_out_.write(trigger_value_);
+    }
     trigger_ = !trigger_;
   }
 
@@ -67,9 +87,13 @@ class TriggerGenerator: public RTT::TaskContext {
 
   bool trigger_;
   std_msgs::Header hdr_;
+  uint32_t trigger_value_;
 
-  uint32_t skip_cycles_;
   uint32_t cycle_counter_;
+
+  // parameters:
+  uint32_t skip_cycles_;
+  std::vector<int> bits_;
 };
 
 ORO_CREATE_COMPONENT(TriggerGenerator)
