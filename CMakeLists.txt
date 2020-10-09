@@ -6,12 +6,14 @@ project(velma_controller)
 find_package(catkin REQUIRED COMPONENTS
   rtt_ros
   rtt_rosclock
+  rtt_rosparam
   std_msgs
   eigen_conversions
   cmake_modules
   image_transport
   controller_common
   rtt_actionlib
+  kdl_parser
   )
 
 find_package(Eigen3 REQUIRED)
@@ -79,5 +81,5 @@ add_executable(image_stamper_node src/image_stamper.cpp)
 target_link_libraries(image_stamper_node ${catkin_LIBRARIES})
 # Export package information (replaces catkin_package() macro) 
 orocos_generate_package(
-  DEPENDS rtt_ros
+  DEPENDS rtt_ros kdl_parser rtt_rosparam
 )

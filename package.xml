@@ -14,8 +14,10 @@
   <build_depend>ocl</build_depend>
   <build_depend>rtt_ros</build_depend>
   <build_depend>rtt_rosclock</build_depend>
+  <build_depend>rtt_rosparam</build_depend>
   <build_depend>controller_common</build_depend>
   <build_depend>rtt_actionlib</build_depend>
+  <build_depend>kdl_parser</build_depend>
 
   <run_depend>rtt</run_depend>
   <run_depend>ocl</run_depend>
