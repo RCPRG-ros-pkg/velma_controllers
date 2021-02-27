@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_common
   rtt_actionlib
   kdl_parser
+  fabric_logger
   )
 
 find_package(Eigen3 REQUIRED)
