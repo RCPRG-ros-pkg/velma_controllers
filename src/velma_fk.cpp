@@ -67,7 +67,8 @@ bool VelmaFK::configureHook() {
 
 void VelmaFK::updateHook() {
   geometry_msgs::Pose left_tool_position_in, right_tool_position_in, left_position_out, right_position_out, left_wrist_out, right_wrist_out;
-  Eigen::Affine3d r[2];
+  Eigen::Affine3d r_tool[2];
+  Eigen::Affine3d r_wrist[2];
 
   if (port_joint_position_in_.read(joint_position_in_) != RTT::NewData) {
     RTT::Logger::In in("VelmaFK::updateHook");
@@ -76,6 +77,7 @@ void VelmaFK::updateHook() {
     return;
   }
 
+  bool left_tool_available = false;
   if (port_left_tool_position_in_.read(left_tool_position_in) == RTT::NewData) {
     tools_[1](0) = left_tool_position_in.position.x;
     tools_[1](1) = left_tool_position_in.position.y;
@@ -85,8 +87,10 @@ void VelmaFK::updateHook() {
     tools_[1](4) = left_tool_position_in.orientation.x;
     tools_[1](5) = left_tool_position_in.orientation.y;
     tools_[1](6) = left_tool_position_in.orientation.z;
+    left_tool_available = true;
   }
 
+  bool right_tool_available = false;
   if (port_right_tool_position_in_.read(right_tool_position_in) == RTT::NewData) {
     tools_[0](0) = right_tool_position_in.position.x;
     tools_[0](1) = right_tool_position_in.position.y;
@@ -96,21 +100,26 @@ void VelmaFK::updateHook() {
     tools_[0](4) = right_tool_position_in.orientation.x;
     tools_[0](5) = right_tool_position_in.orientation.y;
     tools_[0](6) = right_tool_position_in.orientation.z;
+    right_tool_available = true;
   }
 
-  robot_->fkin(r, joint_position_in_, &tools_[0]);
+  robot_->fkin(r_tool, joint_position_in_, &tools_[0]);
 
-  tf::poseEigenToMsg(r[1], left_position_out);
-  tf::poseEigenToMsg(r[0], right_position_out);
+  if (left_tool_available) {
+    tf::poseEigenToMsg(r_tool[1], left_position_out);
+    port_left_position_out_.write(left_position_out);
+  }
 
-  port_left_position_out_.write(left_position_out);
-  port_right_position_out_.write(right_position_out);
+  if (right_tool_available) {
+    tf::poseEigenToMsg(r_tool[0], right_position_out);
+    port_right_position_out_.write(right_position_out);
+  }
 
   // the poses of the wrists
-  robot_->fkin(r, joint_position_in_, &empty_tools_[0]);
+  robot_->fkin(r_wrist, joint_position_in_, &empty_tools_[0]);
 
-  tf::poseEigenToMsg(r[1], left_wrist_out);
-  tf::poseEigenToMsg(r[0], right_wrist_out);
+  tf::poseEigenToMsg(r_wrist[1], left_wrist_out);
+  tf::poseEigenToMsg(r_wrist[0], right_wrist_out);
 
   port_left_wrist_out_.write(left_wrist_out);
   port_right_wrist_out_.write(right_wrist_out);
