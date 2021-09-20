@@ -22,6 +22,7 @@ class VelocityLimiter: public RTT::TaskContext {
     RTT::TaskContext(name),
     position_out_(0),
     max_vel_(0),
+    timestep_(0.002),
     port_position_msr_in_("PositionMsr_INPORT"),
     port_position_in_("Position_INPORT"),
     port_velocity_in_("Velocity_INPORT"),
@@ -34,6 +35,7 @@ class VelocityLimiter: public RTT::TaskContext {
     this->ports()->addPort(port_position_out_);
     this->ports()->addPort(port_velocity_out_);
     this->addProperty("max_vel", max_vel_);
+    this->addProperty("timestep", timestep_);
   }
 
   bool configureHook() {
@@ -60,13 +62,15 @@ class VelocityLimiter: public RTT::TaskContext {
       first_step_ = false;
     }
 
+    const double max_delta_q = max_vel_ * timestep_;
     if (port_position_in_.read(position_cmd) == RTT::NewData) {
-      if (fabs(position_out_ - position_cmd) < max_vel_) {
-        position_out_ = position_cmd;
-      } else if ((position_out_ - position_cmd) < 0.0) {
-        position_out_ += max_vel_;
+      double delta = position_cmd - position_out_;
+      if (delta > max_delta_q) {
+        position_out_ += max_delta_q;
+      } else if (delta < -max_delta_q) {
+        position_out_ -= max_delta_q;
       } else {
-        position_out_ -= max_vel_;
+        position_out_ = position_cmd;
       }
       port_position_out_.write(position_out_);
     }
@@ -94,6 +98,7 @@ class VelocityLimiter: public RTT::TaskContext {
   double position_out_;
   double velocity_out_;
   double max_vel_;
+  double timestep_;
 
   bool first_step_;
 };
