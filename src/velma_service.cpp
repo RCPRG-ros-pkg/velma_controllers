@@ -14,7 +14,8 @@
 
 class VelmaService : public controller_common::RobotService<15,2> {
  public:
-  explicit VelmaService(RTT::TaskContext* owner) : controller_common::RobotService<15,2>(owner) {
+  explicit VelmaService(RTT::TaskContext* owner) : controller_common::RobotService<15,2>(owner, "robot") {
+    std::cout << "Loaded VelmaService to task context " << owner->getName() << std::endl;
   }
 
   virtual ~VelmaService() {
@@ -23,11 +24,6 @@ class VelmaService : public controller_common::RobotService<15,2> {
   virtual void jacobian(Jacobian &x, const Joints &q, const Tool tool[2]) {
     x.setZero();
 #include "jacobian.inc"
-  }
-
-  virtual void inertia(Inertia &x, const Joints &q, const ToolMass toolM[2]) {
-    x.setZero();
-#include "inertia.inc"
   }
 
   virtual void fkin(Eigen::Affine3d *x, const Joints &q, const Tool tool[2]) {

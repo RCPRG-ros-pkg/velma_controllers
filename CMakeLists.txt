@@ -34,14 +34,8 @@ ADD_DEFINITIONS(-DEIGEN_RUNTIME_NO_MALLOC)
 
 orocos_component( velma_components 
   src/components/joint_impedance.cpp
-#  src/components/vector_concate1_7_7_0.cpp
-#  src/components/vector_concate1_1_0_0.cpp
-#  src/components/vector_concate15_2_8_8.cpp
-#  src/components/vector_split1_7_7_0.cpp
-#  src/components/vector_split15_2_8_8.cpp
   src/components/decimator_wrench.cpp
   src/components/cartesian_impedance.cpp
-  src/components/robot_mass_matrix.cpp
   src/components/mass_test.cpp
   src/components/torque_publisher7.cpp
   src/components/join_limit_avoidance15.cpp
@@ -56,6 +50,9 @@ target_link_libraries(velma_components ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIE
 
 orocos_service(velma_service src/velma_service.cpp)
 target_link_libraries(velma_service ${catkin_LIBRARIES})
+
+orocos_service(velma_service_dart src/velma_service_dart.cpp)
+target_link_libraries(velma_service_dart ${catkin_LIBRARIES})
 
 orocos_component(torso_teleop_joy src/torso_teleop_joy.cpp)
 target_link_libraries(torso_teleop_joy ${catkin_LIBRARIES} ${USE_OROCOS_LIBRARIES})

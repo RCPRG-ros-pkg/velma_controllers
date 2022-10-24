@@ -49,6 +49,8 @@ class VelmaFK: public RTT::TaskContext {
   boost::shared_ptr<Robot> robot_;
   boost::array<Tool, 2> tools_;
   boost::array<Tool, 2> empty_tools_;
+
+  std::string service_name_;
 };
 
 #endif  // VELMA_FK_H_

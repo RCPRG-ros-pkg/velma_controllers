@@ -32,6 +32,8 @@ VelmaFK::VelmaFK(const std::string& name) :
   this->ports()->addPort(port_left_wrist_out_);
   this->ports()->addPort(port_right_wrist_out_);
 
+  this->properties()->addProperty("service_name", service_name_);
+
   geometry_msgs::Pose left_position_out, right_position_out, left_wrist_out, right_wrist_out;
 
   port_left_position_out_.setDataSample(left_position_out);
@@ -46,9 +48,10 @@ VelmaFK::~VelmaFK() {
 bool VelmaFK::configureHook() {
   RTT::Logger::In in("VelmaFK::configureHook");
 
-  robot_ = this->getProvider<Robot>("robot");
+  robot_ = this->getProvider<Robot>(service_name_);
   if (!robot_) {
-    Logger::log() << Logger::Error << "Unable to load RobotService" << Logger::endl;
+    Logger::log() << Logger::Error << "Unable to load RobotService: " << service_name_
+        << Logger::endl;
     return false;
   }
 
